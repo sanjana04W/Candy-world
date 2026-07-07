@@ -1,0 +1,43 @@
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        background: "var(--background)",
+        foreground: "var(--foreground)",
+        candy: {
+          purple: {
+            light: "#A78BFA",
+            DEFAULT: "#8B5CF6",
+            dark: "#6D28D9",
+          },
+          pink: {
+            light: "#FDA4AF",
+            DEFAULT: "#F43F5E",
+            dark: "#E11D48",
+          },
+          yellow: {
+            light: "#FEF08A",
+            DEFAULT: "#FACC15",
+            dark: "#EAB308",
+          },
+        },
+        cosmetics: {
+          gold: {
+            light: "#E5D5C5",
+            DEFAULT: "#C5A880",
+            dark: "#A3805B",
+          },
+          cream: "#FAF6F0",
+          dark: "#2C2520",
+        }
+      },
+    },
+  },
+  plugins: [],
+};
