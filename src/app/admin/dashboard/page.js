@@ -1575,8 +1575,8 @@ export default function AdminDashboard() {
                   </div>
                 </form>
               ) : (
-                <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm">
-                  <table className="w-full text-left">
+                <div className="bg-white border border-gray-100 rounded-2xl overflow-x-auto shadow-sm">
+                  <table className="w-full min-w-[700px] text-left">
                     <thead>
                       <tr className="bg-gray-50 text-[10px] font-black uppercase tracking-wider text-gray-400">
                         <th className="px-4 py-3 w-12"></th>
