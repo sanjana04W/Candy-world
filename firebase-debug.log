@@ -1,0 +1,31 @@
+[debug] [2026-07-07T19:23:04.147Z] ----------------------------------------------------------------------
+[debug] [2026-07-07T19:23:04.150Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\pc\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js hosting:sites:create your-project-admin
+[debug] [2026-07-07T19:23:04.150Z] CLI Version:   15.22.1
+[debug] [2026-07-07T19:23:04.150Z] Platform:      win32
+[debug] [2026-07-07T19:23:04.150Z] Node Version:  v22.19.0
+[debug] [2026-07-07T19:23:04.150Z] Detected Agent: unknown
+[debug] [2026-07-07T19:23:04.150Z] Time:          Wed Jul 08 2026 00:53:04 GMT+0530 (India Standard Time)
+[debug] [2026-07-07T19:23:04.151Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-07-07T19:23:04.165Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-07T19:23:04.165Z] > authorizing via signed-in user (one123another@gmail.com)
+[debug] [2026-07-07T19:23:04.165Z] [iam] checking project cake-paradise-969e6 for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2026-07-07T19:23:04.167Z] Checked if tokens are valid: true, expires at: 1783455558579
+[debug] [2026-07-07T19:23:04.167Z] Checked if tokens are valid: true, expires at: 1783455558579
+[debug] [2026-07-07T19:23:04.168Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/cake-paradise-969e6:testIamPermissions [none]
+[debug] [2026-07-07T19:23:04.168Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/cake-paradise-969e6:testIamPermissions  x-goog-user-project=cake-paradise-969e6
+[debug] [2026-07-07T19:23:04.168Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/cake-paradise-969e6:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-07-07T19:23:05.601Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/cake-paradise-969e6:testIamPermissions 200
+[debug] [2026-07-07T19:23:05.601Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/cake-paradise-969e6:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-07-07T19:23:05.602Z] Checked if tokens are valid: true, expires at: 1783455558579
+[debug] [2026-07-07T19:23:05.602Z] Checked if tokens are valid: true, expires at: 1783455558579
+[debug] [2026-07-07T19:23:05.602Z] >>> [apiv2][query] GET https://cloudresourcemanager.googleapis.com/v1/projects/cake-paradise-969e6 [none]
+[debug] [2026-07-07T19:23:05.927Z] <<< [apiv2][status] GET https://cloudresourcemanager.googleapis.com/v1/projects/cake-paradise-969e6 200
+[debug] [2026-07-07T19:23:05.927Z] <<< [apiv2][body] GET https://cloudresourcemanager.googleapis.com/v1/projects/cake-paradise-969e6 {"projectNumber":"379400551693","projectId":"cake-paradise-969e6","lifecycleState":"ACTIVE","name":"cake-paradise","labels":{"firebase":"enabled","firebase-core":"disabled"},"createTime":"2026-06-17T18:30:23.249Z"}
+[debug] [2026-07-07T19:23:05.928Z] Checked if tokens are valid: true, expires at: 1783455558579
+[debug] [2026-07-07T19:23:05.928Z] Checked if tokens are valid: true, expires at: 1783455558579
+[debug] [2026-07-07T19:23:05.929Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/379400551693/sites siteId=your-project-admin&validateOnly=true
+[debug] [2026-07-07T19:23:05.929Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/379400551693/sites {"appId":""}
+[debug] [2026-07-07T19:23:07.509Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/379400551693/sites 400
+[debug] [2026-07-07T19:23:07.509Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/379400551693/sites {"error":{"code":400,"message":"Invalid name: `your-project-admin` is reserved by another project; try something like `your-project-admin-b4dab` instead","status":"FAILED_PRECONDITION"}}
+[warn] !  Invalid name: `your-project-admin` is reserved by another project; try something like `your-project-admin-b4dab` instead 
