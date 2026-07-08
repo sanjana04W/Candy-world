@@ -342,7 +342,7 @@ function NotificationCenter({ orders, lowStockProducts, messages, onNavigate }) 
 
       {/* Dropdown Panel */}
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 overflow-hidden">
+        <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 z-[200] overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
             <p className="text-xs font-black uppercase tracking-widest text-gray-700">Notifications</p>
@@ -773,7 +773,7 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* ── TOP HEADER BAR ── */}
-      <div className="bg-gradient-to-r from-rose-500 via-fuchsia-600 to-purple-700 text-white px-4 sm:px-6 py-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 shadow-lg z-30 shrink-0">
+      <div className="bg-gradient-to-r from-rose-500 via-fuchsia-600 to-purple-700 text-white px-4 sm:px-6 py-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 shadow-lg relative z-50 shrink-0">
         <div className="flex items-center gap-3 w-full md:w-auto">
           {/* Hamburger button for mobile/tablet */}
           <button
