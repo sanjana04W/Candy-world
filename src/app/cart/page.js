@@ -45,8 +45,12 @@ export default function CartPage() {
                 
                 {/* Item Details */}
                 <div className="flex gap-4 items-center">
-                  <div className="h-16 w-16 bg-gray-50 border border-gray-100 rounded-2xl flex items-center justify-center font-bold text-gray-300">
-                    {item.name.charAt(0)}
+                  <div className="h-16 w-16 bg-gray-50 border border-gray-100 rounded-2xl flex items-center justify-center font-bold text-gray-300 overflow-hidden shrink-0">
+                    {item.image ? (
+                      <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                    ) : (
+                      item.name.charAt(0)
+                    )}
                   </div>
                   <div>
                     <h3 className="font-extrabold text-gray-800 text-sm sm:text-base line-clamp-1">{item.name}</h3>
