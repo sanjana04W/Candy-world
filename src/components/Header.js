@@ -161,7 +161,7 @@ export default function Header() {
                   )}
                 </div>
 
-                <Link href="/offers" className="text-sm font-bold text-rose-500 hover:text-rose-600 transition-colors flex items-center gap-1">
+                <Link href="/offers" className="text-sm font-bold text-purple-600 hover:text-purple-700 transition-colors flex items-center gap-1">
                   <Tag className="h-3.5 w-3.5" />
                   Offers
                 </Link>

@@ -6,14 +6,14 @@ import { useShop } from "@/context/ShopContext";
 import ProductCard from "@/components/ProductCard";
 import { Sparkles, Tag, Clock, Flame, ArrowRight, Percent } from "lucide-react";
 
-// Countdown timer hook
-function useCountdown(targetDate) {
-  const [timeLeft, setTimeLeft] = useState({ d: 0, h: 0, m: 0, s: 0 });
+// Elapsed time hook — counts UP from a start date
+function useElapsed(startDate) {
+  const [elapsed, setElapsed] = useState({ d: 0, h: 0, m: 0, s: 0 });
 
   useEffect(() => {
     const update = () => {
-      const diff = Math.max(0, targetDate - Date.now());
-      setTimeLeft({
+      const diff = Math.max(0, Date.now() - startDate);
+      setElapsed({
         d: Math.floor(diff / 86400000),
         h: Math.floor((diff % 86400000) / 3600000),
         m: Math.floor((diff % 3600000) / 60000),
@@ -23,9 +23,9 @@ function useCountdown(targetDate) {
     update();
     const id = setInterval(update, 1000);
     return () => clearInterval(id);
-  }, [targetDate]);
+  }, [startDate]);
 
-  return timeLeft;
+  return elapsed;
 }
 
 function CountdownBlock({ value, label }) {
@@ -48,9 +48,9 @@ export default function OffersPage() {
 
   const newArrivals = products.filter((p) => p.status === "active" && p.isNewArrival);
 
-  // Flash sale ends 7 days from now
-  const flashSaleEnd = Date.now() + 7 * 24 * 3600 * 1000;
-  const countdown = useCountdown(flashSaleEnd);
+  // Sale started on July 1st 2026 — count up from that date
+  const saleStart = new Date("2026-07-01T00:00:00").getTime();
+  const elapsed = useElapsed(saleStart);
 
   return (
     <div className="min-h-screen bg-gray-50/50">
@@ -76,7 +76,7 @@ export default function OffersPage() {
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center text-white">
           <div className="inline-flex items-center gap-2 bg-white/20 text-white text-xs font-extrabold uppercase px-4 py-1.5 rounded-full backdrop-blur-sm mb-5 animate-pulse">
             <Flame className="h-3.5 w-3.5" />
-            Limited Time Flash Sale — Ends Soon!
+            🔴 Live Sale — Time Goes By!
           </div>
 
           <h1 className="text-4xl md:text-6xl font-black leading-tight tracking-tight mb-4">
@@ -87,12 +87,15 @@ export default function OffersPage() {
             Massive discounts on imported candy and premium chocolates. Limited stock — grab yours before it&apos;s gone!
           </p>
 
-          {/* Countdown */}
-          <div className="flex justify-center gap-3">
-            <CountdownBlock value={countdown.d} label="Days" />
-            <CountdownBlock value={countdown.h} label="Hours" />
-            <CountdownBlock value={countdown.m} label="Mins" />
-            <CountdownBlock value={countdown.s} label="Secs" />
+          {/* Elapsed timer */}
+          <div className="flex flex-col items-center gap-2 mb-2">
+            <p className="text-white/70 text-xs font-semibold uppercase tracking-widest">⏱ Sale has been running for</p>
+            <div className="flex justify-center gap-3">
+              <CountdownBlock value={elapsed.d} label="Days" />
+              <CountdownBlock value={elapsed.h} label="Hours" />
+              <CountdownBlock value={elapsed.m} label="Mins" />
+              <CountdownBlock value={elapsed.s} label="Secs" />
+            </div>
           </div>
         </div>
       </section>

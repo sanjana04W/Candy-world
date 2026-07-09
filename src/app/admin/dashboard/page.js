@@ -277,13 +277,15 @@ function InventoryTab({ products, lowStockProducts, isOwner, onSave }) {
 // -----------------------------------------------------------------
 // NOTIFICATION CENTER — top-bar bell dropdown
 // -----------------------------------------------------------------
-function NotificationCenter({ orders, lowStockProducts, messages, onNavigate }) {
+function NotificationCenter({ orders, lowStockProducts, messages, onNavigate, onCloseSidebar }) {
   const [open, setOpen] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState("orders");
   const [readIds, setReadIds] = React.useState(() => {
     try { return JSON.parse(localStorage.getItem("cw_notif_read") || "[]"); } catch { return []; }
   });
   const ref = React.useRef(null);
+  const btnRef = React.useRef(null);
+  const [dropPos, setDropPos] = React.useState({ top: 0, right: 0 });
 
   // Pending orders = unread notifications
   const pendingOrders = orders.filter(o => o.orderStatus === "Pending");
@@ -314,6 +316,19 @@ function NotificationCenter({ orders, lowStockProducts, messages, onNavigate }) 
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  // Calculate fixed dropdown position relative to bell button
+  const handleBellClick = () => {
+    if (!open && btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect();
+      setDropPos({
+        top: rect.bottom + 8,
+        right: window.innerWidth - rect.right,
+      });
+    }
+    if (onCloseSidebar) onCloseSidebar(); // close sidebar on mobile before opening
+    setOpen(v => !v);
+  };
+
   const timeAgo = (dateStr) => {
     const diff = Date.now() - new Date(dateStr).getTime();
     const m = Math.floor(diff / 60000);
@@ -328,7 +343,8 @@ function NotificationCenter({ orders, lowStockProducts, messages, onNavigate }) 
     <div className="relative" ref={ref}>
       {/* Bell Button */}
       <button
-        onClick={() => setOpen(v => !v)}
+        ref={btnRef}
+        onClick={handleBellClick}
         className="relative p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-colors"
         title="Notifications"
       >
@@ -340,9 +356,11 @@ function NotificationCenter({ orders, lowStockProducts, messages, onNavigate }) 
         )}
       </button>
 
-      {/* Dropdown Panel */}
+      {/* Dropdown Panel — fixed so it escapes all parent stacking contexts */}
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 z-[200] overflow-hidden">
+        <div
+          style={{ top: dropPos.top, right: dropPos.right }}
+          className="fixed w-[min(320px,calc(100vw-16px))] bg-white rounded-2xl shadow-2xl border border-gray-100 z-[9999] overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
             <p className="text-xs font-black uppercase tracking-widest text-gray-700">Notifications</p>
@@ -750,6 +768,21 @@ export default function AdminDashboard() {
     setAdminUsers(updated);
   };
 
+  // Track header height so the mobile backdrop starts below it
+  const headerRef = React.useRef(null);
+  React.useEffect(() => {
+    const update = () => {
+      if (headerRef.current) {
+        document.documentElement.style.setProperty(
+          "--header-h", `${headerRef.current.offsetHeight}px`
+        );
+      }
+    };
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+
   // -----------------------------------------------------------------
   // LOADING
   // -----------------------------------------------------------------
@@ -770,10 +803,11 @@ export default function AdminDashboard() {
     .filter(o => o.orderStatus !== "Cancelled")
     .reduce((s, o) => s + o.totalAmount, 0);
 
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* ── TOP HEADER BAR ── */}
-      <div className="bg-gradient-to-r from-rose-500 via-fuchsia-600 to-purple-700 text-white px-4 sm:px-6 py-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 shadow-lg relative z-50 shrink-0">
+      <div ref={headerRef} className="bg-gradient-to-r from-rose-500 via-fuchsia-600 to-purple-700 text-white px-4 sm:px-6 py-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 shadow-lg relative z-50 shrink-0">
         <div className="flex items-center gap-3 w-full md:w-auto">
           {/* Hamburger button for mobile/tablet */}
           <button
@@ -829,6 +863,7 @@ export default function AdminDashboard() {
               orders={orders}
               lowStockProducts={lowStockProducts}
               messages={messages}
+              onCloseSidebar={() => setMobileSidebarOpen(false)}
               onNavigate={(tab, msgId) => {
                 setActiveTab(tab);
                 setMobileSidebarOpen(false);
@@ -860,7 +895,8 @@ export default function AdminDashboard() {
         {/* ── MOBILE BACKDROP OVERLAY ── */}
         {mobileSidebarOpen && (
           <div
-            className="lg:hidden fixed inset-0 bg-black/40 backdrop-blur-xs z-40 transition-opacity"
+            className="lg:hidden fixed inset-x-0 bottom-0 bg-black/40 backdrop-blur-xs z-40 transition-opacity"
+            style={{ top: "var(--header-h, 120px)" }}
             onClick={() => setMobileSidebarOpen(false)}
           />
         )}
