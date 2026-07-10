@@ -53,13 +53,14 @@ const TESTIMONIALS = [
   { name: "Kasun P.", area: "Kandy", text: "Delivered all the way to Kandy in 3 days with COD. No issues at all. The Sour Patch Kids were exactly as described — super authentic!", rating: 5 },
   { name: "Dinesh M.", area: "Battaramulla", text: "Love the TikTok page updates — I always know what's new. Fast delivery and the Pringles were fresh. Highly recommend for imported snacks.", rating: 5 },
   { name: "Nethma R.", area: "Piliyandala", text: "The giant lollipops were a hit for my daughter's birthday! Super sweet, colorful and they loved it. Easy ordering process through the website.", rating: 5 },
+  { name: "Shenali W.", area: "Mount Lavinia", text: "Found all my favorite childhood chocolates here. Everything was within expiry dates and tasted perfectly fresh. Great customer service too!", rating: 5 },
 ];
 
 const TRUST_BADGES = [
-  { Icon: Truck, title: "Islandwide COD", desc: "Pay cash on delivery", color: "text-candy-pink" },
-  { Icon: ShieldCheck, title: "100% Genuine", desc: "Directly imported brands", color: "text-candy-purple" },
-  { Icon: RotateCcw, title: "Easy Exchange", desc: "Hassle-free returns", color: "text-amber-500" },
-  { Icon: Clock, title: "Fast Delivery", desc: "1–5 business days", color: "text-emerald-500" },
+  { Icon: Truck, title: "Islandwide COD", desc: "Pay cash on delivery", color: "text-candy-pink", hoverClass: "hover:bg-candy-pink/10 hover:border-candy-pink/30" },
+  { Icon: ShieldCheck, title: "100% Genuine", desc: "Directly imported brands", color: "text-candy-purple", hoverClass: "hover:bg-candy-purple/10 hover:border-candy-purple/30" },
+  { Icon: RotateCcw, title: "Easy Exchange", desc: "Hassle-free returns", color: "text-amber-500", hoverClass: "hover:bg-amber-50 hover:border-amber-200" },
+  { Icon: Clock, title: "Fast Delivery", desc: "1–5 business days", color: "text-emerald-500", hoverClass: "hover:bg-emerald-50 hover:border-emerald-200" },
 ];
 
 export default function HomePage() {
@@ -67,6 +68,7 @@ export default function HomePage() {
   const [activeSlide, setActiveSlide] = useState(0);
   const [testimonialIdx, setTestimonialIdx] = useState(0);
   const timerRef = useRef(null);
+  const testimonialTimerRef = useRef(null);
 
   // Auto-rotate hero
   useEffect(() => {
@@ -76,12 +78,40 @@ export default function HomePage() {
     return () => clearInterval(timerRef.current);
   }, []);
 
+  // Auto-rotate testimonials
+  useEffect(() => {
+    const totalPages = Math.ceil(TESTIMONIALS.length / 3);
+    if (totalPages > 1) {
+      testimonialTimerRef.current = setInterval(() => {
+        setTestimonialIdx((s) => {
+          const nextPage = Math.floor(s / 3) + 1;
+          return (nextPage % totalPages) * 3;
+        });
+      }, 5000);
+    }
+    return () => clearInterval(testimonialTimerRef.current);
+  }, []);
+
   const goSlide = (idx) => {
     clearInterval(timerRef.current);
     setActiveSlide(idx);
     timerRef.current = setInterval(() => {
       setActiveSlide((s) => (s + 1) % HERO_SLIDES.length);
     }, 5000);
+  };
+
+  const goTestimonial = (idx) => {
+    clearInterval(testimonialTimerRef.current);
+    setTestimonialIdx(idx);
+    const totalPages = Math.ceil(TESTIMONIALS.length / 3);
+    if (totalPages > 1) {
+      testimonialTimerRef.current = setInterval(() => {
+        setTestimonialIdx((s) => {
+          const nextPage = Math.floor(s / 3) + 1;
+          return (nextPage % totalPages) * 3;
+        });
+      }, 5000);
+    }
   };
 
   const featured = products.filter((p) => p.isFeatured && p.status === "active").slice(0, 4);
@@ -165,8 +195,8 @@ export default function HomePage() {
       {/* ─────────── TRUST BADGES ─────────── */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8">
         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 grid grid-cols-2 lg:grid-cols-4 gap-px overflow-hidden">
-          {TRUST_BADGES.map(({ Icon, title, desc, color }, i) => (
-            <div key={i} className="flex gap-3.5 items-center p-5 bg-white hover:bg-gray-50 transition-colors">
+          {TRUST_BADGES.map(({ Icon, title, desc, color, hoverClass }, i) => (
+            <div key={i} className={`flex gap-3.5 items-center p-5 bg-white border border-transparent ${hoverClass} hover:-translate-y-1 hover:shadow-lg transition-all duration-300 cursor-pointer relative z-10 hover:z-20`}>
               <Icon className={`h-9 w-9 ${color} flex-shrink-0`} />
               <div>
                 <h5 className="font-extrabold text-gray-900 text-sm">{title}</h5>
@@ -415,7 +445,7 @@ export default function HomePage() {
             {TESTIMONIALS.slice(testimonialIdx, testimonialIdx + 3).map((t, i) => (
               <div
                 key={i}
-                className="bg-gray-50 border border-gray-100 rounded-2xl p-6 space-y-4 hover:shadow-md transition-shadow"
+                className="bg-gray-50 border border-gray-100 rounded-2xl p-6 space-y-4 hover:-translate-y-1 hover:shadow-xl transition-all duration-300 cursor-pointer"
               >
                 <Quote className="h-6 w-6 text-candy-pink/40" />
                 <p className="text-sm text-gray-600 leading-relaxed">&quot;{t.text}&quot;</p>
@@ -442,7 +472,7 @@ export default function HomePage() {
             {Array.from({ length: Math.ceil(TESTIMONIALS.length / 3) }).map((_, i) => (
               <button
                 key={i}
-                onClick={() => setTestimonialIdx(i * 3)}
+                onClick={() => goTestimonial(i * 3)}
                 className={`h-2 rounded-full transition-all duration-300 ${
                   Math.floor(testimonialIdx / 3) === i
                     ? "bg-candy-pink w-6"

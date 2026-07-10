@@ -195,7 +195,7 @@ export default function AboutPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {TEAM.map(({ name, role, emoji, desc }, i) => (
-              <div key={i} className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow text-center space-y-3">
+              <div key={i} className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-lg hover:border-candy-purple/30 hover:bg-candy-purple/5 hover:-translate-y-1 transition-all duration-300 text-center space-y-3 cursor-pointer group">
                 <div className="w-16 h-16 bg-gradient-to-br from-candy-pink/20 to-candy-purple/20 rounded-full flex items-center justify-center text-3xl mx-auto shadow-sm">
                   {emoji}
                 </div>
@@ -223,7 +223,7 @@ export default function AboutPage() {
               { name: "Thalawathugoda Outlet", address: "124, Hokandara Road, Thalawathugoda, Sri Lanka", hours: "Mon–Sat 9:00 AM – 8:00 PM · Sun 10:00 AM – 6:00 PM", color: "border-candy-pink", badge: "🏪" },
               { name: "Colombo 03 Outlet", address: "34/2, Flower Road, Colombo 03, Sri Lanka", hours: "Mon–Sat 10:00 AM – 9:00 PM · Sun 11:00 AM – 7:00 PM", color: "border-candy-purple", badge: "🏬" },
             ].map((store, i) => (
-              <div key={i} className={`bg-white border-l-4 ${store.color} border border-gray-100 rounded-2xl p-6 shadow-sm space-y-3`}>
+              <div key={i} className={`bg-white border-l-4 ${store.color} border-y border-r border-gray-100 hover:border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer space-y-3`}>
                 <div className="text-2xl">{store.badge}</div>
                 <h4 className="font-extrabold text-gray-900">{store.name}</h4>
                 <div className="space-y-1 text-xs text-gray-500">
