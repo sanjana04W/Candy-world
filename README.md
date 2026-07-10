@@ -62,8 +62,9 @@ The system also provides a secure Admin Dashboard that enables administrators to
 - 🥫 Gourmet Foods
 - 🎁 Offers & Sale
 
----
 
+
+---
 # 📂 Project Structure
 
 ```text
@@ -127,8 +128,35 @@ Candy-World/
 | Google Maps | Store Location |
 | Vercel | Deployment |
 
----
 
+---
+# 🎨 UI Highlights
+
+- Mobile-first responsive design
+- Modern candy-inspired interface
+- Bright and playful color palette
+- Fast product browsing
+- SEO optimized pages
+- Optimized product images
+- Accessible navigation
+- Clean checkout experience
+
+
+---
+# 🔍 Search & Filtering
+
+Customers can easily find products using:
+
+- Instant Search
+- Category Filter
+- Product Sorting
+- Featured Products
+- New Arrivals
+- Offers & Sale
+
+
+
+---
 # 🚀 Getting Started
 
 ## Prerequisites
@@ -246,7 +274,6 @@ Order Processing
 ```
 
 ---
-
 # 🗂 Firebase Collections
 
 | Collection | Description |
@@ -276,17 +303,19 @@ Order Processing
 
 ---
 
-## Administrator
+# 📊 Admin Dashboard
 
-- Secure Login
+The Admin Dashboard contains:
+
 - Dashboard Overview
-- Manage Products
-- Manage Categories
-- Manage Inventory
-- Manage Orders
-- Manage Promotions
-- Manage Customers
-- Stock Monitoring
+- Product Management
+- Category Management
+- Inventory Management
+- Order Management
+- Customer Management
+- Promotion Management
+- Admin User Management
+- Analytics Overview
 
 ---
 
@@ -327,8 +356,124 @@ Order Processing
 - Customer Reviews
 - Multi-language Support
 
----
 
+
+---
+# 📦 Inventory Management
+
+The inventory system automatically:
+
+- Tracks stock quantities
+- Updates inventory after each order
+- Displays Out of Stock products
+- Shows Low Stock alerts
+- Allows manual stock updates
+- Supports hidden products
+
+
+
+---
+# 📧 Email Notifications
+
+The system uses EmailJS for:
+
+- Contact Form
+- Order Confirmation
+- Customer Notifications
+- Admin Notifications
+
+
+---
+# 📍 Store Locations
+
+Candy World currently operates two physical retail stores.
+
+• Battaramulla
+
+• Boralesgamuwa
+
+The website also includes Google Maps integration for easy navigation.
+
+
+
+---
+# 🚚 Delivery
+
+- Cash on Delivery (COD)
+- Islandwide Delivery
+- Delivery Date Selection
+- Order Notes
+- Order Confirmation
+
+
+---
+# 🔐 Security
+
+- Firebase Authentication
+- Protected Admin Routes
+- Firestore Security Rules
+- Environment Variables
+- Role-based Authorization
+
+
+---
+# 📈 SEO
+
+- Dynamic Metadata
+- Open Graph Tags
+- Structured Data
+- XML Sitemap
+- Robots.txt
+- Semantic HTML
+
+
+---
+# 🤝 Contributing
+
+Contributions are welcome.
+
+1. Fork the repository
+
+2. Create your feature branch
+
+3. Commit your changes
+
+4. Push to your branch
+
+5. Open a Pull Request
+
+
+---
+# 📌 Project Status
+
+✔ Research Completed
+
+✔ UI Design
+
+✔ Frontend Development
+
+✔ Firebase Integration
+
+✔ Admin Dashboard
+
+✔ Testing
+
+✔ Deployment
+
+✔ Documentation  
+
+
+---
+## 🌍 Live Demo
+
+
+Production URL:
+https://candy-world-website.vercel.app/
+
+Development URL:
+http://localhost:3000
+
+---
 # 💖 Brand Vision
 
 > **"Sweeten your life with candies, chocolates, cosmetics, and gourmet delights."**
@@ -348,8 +493,3 @@ All branding, logos, product images, and business content belong to **Candy Worl
 # 👩‍💻 Developed By
 
 ### **Wenuri Sanjana**
-
-Software Engineering Undergraduate
-
-
----
