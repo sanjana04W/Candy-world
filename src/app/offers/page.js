@@ -6,14 +6,14 @@ import { useShop } from "@/context/ShopContext";
 import ProductCard from "@/components/ProductCard";
 import { Sparkles, Tag, Clock, Flame, ArrowRight, Percent } from "lucide-react";
 
-// Elapsed time hook — counts UP from a start date
-function useElapsed(startDate) {
-  const [elapsed, setElapsed] = useState({ d: 0, h: 0, m: 0, s: 0 });
+// Countdown hook — counts DOWN to a target date
+function useCountdown(targetDate) {
+  const [timeLeft, setTimeLeft] = useState({ d: 0, h: 0, m: 0, s: 0 });
 
   useEffect(() => {
     const update = () => {
-      const diff = Math.max(0, Date.now() - startDate);
-      setElapsed({
+      const diff = Math.max(0, targetDate - Date.now());
+      setTimeLeft({
         d: Math.floor(diff / 86400000),
         h: Math.floor((diff % 86400000) / 3600000),
         m: Math.floor((diff % 3600000) / 60000),
@@ -23,9 +23,9 @@ function useElapsed(startDate) {
     update();
     const id = setInterval(update, 1000);
     return () => clearInterval(id);
-  }, [startDate]);
+  }, [targetDate]);
 
-  return elapsed;
+  return timeLeft;
 }
 
 function CountdownBlock({ value, label }) {
@@ -48,9 +48,9 @@ export default function OffersPage() {
 
   const newArrivals = products.filter((p) => p.status === "active" && p.isNewArrival);
 
-  // Sale started on July 1st 2026 — count up from that date
-  const saleStart = new Date("2026-07-01T00:00:00").getTime();
-  const elapsed = useElapsed(saleStart);
+  // Sale ends on July 31st 2026 — count down to that date
+  const saleEnd = new Date("2026-07-31T23:59:59").getTime();
+  const timeLeft = useCountdown(saleEnd);
 
   return (
     <div className="min-h-screen bg-gray-50/50">
@@ -76,7 +76,7 @@ export default function OffersPage() {
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center text-white">
           <div className="inline-flex items-center gap-2 bg-white/20 text-white text-xs font-extrabold uppercase px-4 py-1.5 rounded-full backdrop-blur-sm mb-5 animate-pulse">
             <Flame className="h-3.5 w-3.5" />
-            🔴 Live Sale — Time Goes By!
+            Limited Time Flash Sale — Ends Soon!
           </div>
 
           <h1 className="text-4xl md:text-6xl font-black leading-tight tracking-tight mb-4">
@@ -87,14 +87,14 @@ export default function OffersPage() {
             Massive discounts on imported candy and premium chocolates. Limited stock — grab yours before it&apos;s gone!
           </p>
 
-          {/* Elapsed timer */}
+          {/* Countdown timer */}
           <div className="flex flex-col items-center gap-2 mb-2">
-            <p className="text-white/70 text-xs font-semibold uppercase tracking-widest">⏱ Sale has been running for</p>
+            <p className="text-white/70 text-xs font-semibold uppercase tracking-widest">⏱ Sale Ends In</p>
             <div className="flex justify-center gap-3">
-              <CountdownBlock value={elapsed.d} label="Days" />
-              <CountdownBlock value={elapsed.h} label="Hours" />
-              <CountdownBlock value={elapsed.m} label="Mins" />
-              <CountdownBlock value={elapsed.s} label="Secs" />
+              <CountdownBlock value={timeLeft.d} label="Days" />
+              <CountdownBlock value={timeLeft.h} label="Hours" />
+              <CountdownBlock value={timeLeft.m} label="Mins" />
+              <CountdownBlock value={timeLeft.s} label="Secs" />
             </div>
           </div>
         </div>

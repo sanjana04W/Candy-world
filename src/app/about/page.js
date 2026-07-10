@@ -8,10 +8,10 @@ export const metadata = {
 };
 
 const VALUES = [
-  { Icon: ShieldCheck, title: "100% Authenticity", desc: "Every item is sourced directly from certified international distributors and hand-inspected before listing.", color: "text-candy-purple bg-candy-purple/10" },
-  { Icon: Globe, title: "Global Imports", desc: "We source from the US, UK, Europe, Japan, and Korea — bringing you items that aren't available elsewhere in Sri Lanka.", color: "text-sky-600 bg-sky-50" },
-  { Icon: Truck, title: "Islandwide COD", desc: "We deliver to every corner of Sri Lanka with Cash on Delivery — no prepayment required.", color: "text-emerald-600 bg-emerald-50" },
-  { Icon: Heart, title: "Community First", desc: "Our TikTok family drives everything. We listen to trends, respond to requests, and stock what our customers love.", color: "text-candy-pink bg-candy-pink/10" },
+  { Icon: ShieldCheck, title: "100% Authenticity", desc: "Every item is sourced directly from certified international distributors and hand-inspected before listing.", color: "text-candy-purple bg-candy-purple/10", hoverClass: "hover:bg-candy-purple/5 hover:border-candy-purple/30" },
+  { Icon: Globe, title: "Global Imports", desc: "We source from the US, UK, Europe, Japan, and Korea — bringing you items that aren't available elsewhere in Sri Lanka.", color: "text-sky-600 bg-sky-50", hoverClass: "hover:bg-sky-50 hover:border-sky-200" },
+  { Icon: Truck, title: "Islandwide COD", desc: "We deliver to every corner of Sri Lanka with Cash on Delivery — no prepayment required.", color: "text-emerald-600 bg-emerald-50", hoverClass: "hover:bg-emerald-50 hover:border-emerald-200" },
+  { Icon: Heart, title: "Community First", desc: "Our TikTok family drives everything. We listen to trends, respond to requests, and stock what our customers love.", color: "text-candy-pink bg-candy-pink/10", hoverClass: "hover:bg-candy-pink/5 hover:border-candy-pink/30" },
 ];
 
 const MILESTONES = [
@@ -19,6 +19,8 @@ const MILESTONES = [
   { year: "2021", label: "First Physical Store", desc: "Opened our first walk-in candy retail store in Battaramulla, Colombo." },
   { year: "2022", label: "Cosmetics Line Launch", desc: "Expanded to include NMRA-compliant imported cosmetics — CeraVe, Maybelline, and more." },
   { year: "2023", label: "Second Outlet + E-Commerce", desc: "Opened Colombo 03 outlet and launched the online ordering platform for islandwide delivery." },
+  { year: "2024", label: "Islandwide Expansion", desc: "Scaled up our delivery network to cover 100% of Sri Lanka with next-day dispatch." },
+  { year: "2025", label: "Candy World App", desc: "Launched our mobile app for seamless ordering, loyalty rewards, and exclusive app-only drops." },
 ];
 
 const TEAM = [
@@ -126,8 +128,8 @@ export default function AboutPage() {
             <h2 className="text-2xl md:text-3xl font-black text-gray-900">Our Core Values</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {VALUES.map(({ Icon, title, desc, color }, i) => (
-              <div key={i} className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all space-y-3">
+            {VALUES.map(({ Icon, title, desc, color, hoverClass }, i) => (
+              <div key={i} className={`bg-white border border-gray-100 ${hoverClass} rounded-2xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all space-y-3 cursor-pointer`}>
                 <div className={`inline-flex p-3 rounded-xl ${color}`}>
                   <Icon className="h-6 w-6" />
                 </div>
@@ -154,7 +156,7 @@ export default function AboutPage() {
               {MILESTONES.map(({ year, label, desc }, i) => (
                 <div key={i} className={`flex items-start gap-6 md:gap-0 ${i % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"}`}>
                   <div className={`hidden md:block w-5/12 ${i % 2 === 0 ? "text-right pr-10" : "text-left pl-10"}`}>
-                    <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm inline-block text-left">
+                    <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm inline-block text-left hover:bg-candy-pink/5 hover:border-candy-pink/30 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
                       <p className="text-xs font-extrabold text-candy-pink uppercase tracking-wider mb-1">{year}</p>
                       <h4 className="font-extrabold text-gray-800 text-sm mb-1">{label}</h4>
                       <p className="text-xs text-gray-500 leading-relaxed">{desc}</p>
@@ -169,7 +171,7 @@ export default function AboutPage() {
                   <div className="hidden md:block w-5/12" />
 
                   {/* Mobile version */}
-                  <div className="md:hidden flex gap-4 items-start bg-white border border-gray-100 rounded-2xl p-5 shadow-sm w-full">
+                  <div className="md:hidden flex gap-4 items-start bg-white border border-gray-100 rounded-2xl p-5 shadow-sm w-full hover:bg-candy-pink/5 hover:border-candy-pink/30 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
                     <div className="w-12 h-12 bg-gradient-to-br from-candy-pink to-candy-purple rounded-full flex items-center justify-center text-white text-xs font-black shadow-md flex-shrink-0">
                       {year}
                     </div>

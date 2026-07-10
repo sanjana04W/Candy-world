@@ -77,7 +77,7 @@ export default function ContactPage() {
             href="https://wa.me/94771234567"
             target="_blank"
             rel="noopener noreferrer"
-            className="group bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all flex items-center gap-4"
+            className="group bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-md hover:-translate-y-1 hover:bg-emerald-50 hover:border-emerald-200 transition-all flex items-center gap-4"
           >
             <div className="p-3 bg-emerald-50 text-emerald-500 rounded-xl flex-shrink-0">
               <MessageCircle className="h-6 w-6" />
@@ -91,7 +91,7 @@ export default function ContactPage() {
 
           <a
             href="tel:+94771234567"
-            className="group bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all flex items-center gap-4"
+            className="group bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-md hover:-translate-y-1 hover:bg-candy-pink/5 hover:border-candy-pink/30 transition-all flex items-center gap-4"
           >
             <div className="p-3 bg-candy-pink/10 text-candy-pink rounded-xl flex-shrink-0">
               <Phone className="h-6 w-6" />
@@ -104,7 +104,7 @@ export default function ContactPage() {
 
           <a
             href="mailto:candyworld.lk23@gmail.com"
-            className="group bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all flex items-center gap-4"
+            className="group bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-md hover:-translate-y-1 hover:bg-candy-purple/5 hover:border-candy-purple/30 transition-all flex items-center gap-4"
           >
             <div className="p-3 bg-candy-purple/10 text-candy-purple rounded-xl flex-shrink-0">
               <Mail className="h-6 w-6" />
