@@ -16,25 +16,30 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // If already logged in, redirect
+  // If already logged in, redirect (unless showing success toast)
   React.useEffect(() => {
-    if (user) {
+    if (user && !successMsg) {
       router.push(redirect);
     }
-  }, [user, router, redirect]);
+  }, [user, router, redirect, successMsg]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setSuccessMsg("");
     setLoading(true);
 
     const res = await login(email, password);
     if (res.success) {
-      router.push(redirect);
+      setSuccessMsg("Login successful! Welcome back.");
+      setTimeout(() => {
+        router.push(redirect);
+      }, 1500);
     } else {
-      setError(res.error || "Failed to log in. Please check your credentials.");
+      setError(res.error || "Failed to log in. Invalid email or password.");
       setLoading(false);
     }
   };
@@ -47,9 +52,19 @@ function LoginForm() {
         <p className="text-xs text-gray-500">Log in to add sweet treats to your cart and check out.</p>
       </div>
 
+      {/* Error Notification */}
       {error && (
-        <div className="bg-rose-50 border border-rose-100 text-rose-600 text-xs font-semibold p-3.5 rounded-2xl mb-6 text-center">
-          ⚠️ {error}
+        <div className="fixed top-10 left-1/2 -translate-x-1/2 z-50 bg-rose-50 text-rose-600 px-6 py-3 rounded-full shadow-lg border border-rose-100 flex items-center gap-3 animate-pulse shadow-rose-500/10">
+          <span className="text-xl">⚠️</span>
+          <span className="font-extrabold text-sm">{error}</span>
+        </div>
+      )}
+
+      {/* Success Notification */}
+      {successMsg && (
+        <div className="fixed top-10 left-1/2 -translate-x-1/2 z-50 bg-emerald-50 text-emerald-600 px-6 py-3 rounded-full shadow-lg border border-emerald-100 flex items-center gap-3 animate-bounce shadow-emerald-500/10">
+          <Sparkles className="h-5 w-5" />
+          <span className="font-extrabold text-sm">{successMsg}</span>
         </div>
       )}
 

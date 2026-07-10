@@ -35,7 +35,16 @@ module.exports = {
           },
           cream: "#FAF6F0",
           dark: "#2C2520",
-        }
+        },
+      },
+      animation: {
+        'fade-out-up': 'fadeOutUp 1s ease-out forwards',
+      },
+      keyframes: {
+        fadeOutUp: {
+          '0%': { opacity: '1', transform: 'translate(-50%, -50%) scale(0.5)' },
+          '100%': { opacity: '0', transform: 'translate(-50%, -200%) scale(1.2)' },
+        },
       },
     },
   },

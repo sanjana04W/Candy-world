@@ -15,9 +15,9 @@ const HERO_SLIDES = [
     sub: "Directly imported candy from the US, UK, and Korea — now in Colombo!",
     badge: "🍬 Candy Drop Sale — 25% Off",
     bg: "from-rose-500 via-pink-600 to-purple-600",
+    image: "/candy_hero.png",
     cta: "Shop Candy",
     link: "/category/candy",
-    emoji: "🍬",
     accent: "text-yellow-300",
   },
   {
@@ -25,9 +25,9 @@ const HERO_SLIDES = [
     sub: "Toblerone, Ferrero Rocher & premium imported gift boxes — perfect for gifting.",
     badge: "🍫 Up to 35% Off Chocolates",
     bg: "from-amber-700 via-yellow-700 to-amber-900",
+    image: "/chocolate_hero.png",
     cta: "Explore Chocolates",
     link: "/category/chocolate",
-    emoji: "🍫",
     accent: "text-amber-200",
   },
   {
@@ -35,17 +35,53 @@ const HERO_SLIDES = [
     sub: "Pringles, Nutella & premium pantry picks — straight from global shelves.",
     badge: "🫙 Gourmet Imports In Stock",
     bg: "from-green-600 via-emerald-700 to-teal-800",
+    image: "/gourmet_hero.png",
     cta: "Explore Gourmet",
     link: "/category/gourmet",
-    emoji: "🫙",
     accent: "text-emerald-200",
   },
 ];
 
 const CATEGORIES = [
-  { slug: "candy", name: "Candy", emoji: "🍬", desc: "Gummy, Sour & Viral Sweets", from: "from-pink-50", to: "to-rose-100", border: "border-pink-100", text: "text-candy-pink", bg: "bg-candy-pink" },
-  { slug: "chocolate", name: "Chocolate", emoji: "🍫", desc: "Imported Bars & Gift Boxes", from: "from-amber-50", to: "to-yellow-100", border: "border-amber-100", text: "text-amber-700", bg: "bg-amber-500" },
-  { slug: "gourmet", name: "Gourmet", emoji: "🫙", desc: "Snacks, Crisps & Condiments", from: "from-emerald-50", to: "to-teal-50", border: "border-emerald-100", text: "text-emerald-700", bg: "bg-emerald-500" },
+  {
+    slug: "candy",
+    name: "Candy",
+    emoji: "🍬",
+    desc: "Gummy, Sour & Viral Sweets",
+    image: "/cat_candy.png",
+    from: "from-pink-500",
+    to: "to-rose-600",
+    border: "border-pink-200",
+    text: "text-white",
+    badge: "bg-candy-pink",
+    glow: "group-hover:shadow-candy-pink/40",
+  },
+  {
+    slug: "chocolate",
+    name: "Chocolate",
+    emoji: "🍫",
+    desc: "Imported Bars & Gift Boxes",
+    image: "/cat_chocolate.png",
+    from: "from-amber-600",
+    to: "to-yellow-700",
+    border: "border-amber-200",
+    text: "text-white",
+    badge: "bg-amber-500",
+    glow: "group-hover:shadow-amber-500/40",
+  },
+  {
+    slug: "gourmet",
+    name: "Gourmet",
+    emoji: "🫙",
+    desc: "Snacks, Crisps & Condiments",
+    image: "/cat_gourmet.png",
+    from: "from-emerald-600",
+    to: "to-teal-700",
+    border: "border-emerald-200",
+    text: "text-white",
+    badge: "bg-emerald-500",
+    glow: "group-hover:shadow-emerald-500/40",
+  },
 ];
 
 const TESTIMONIALS = [
@@ -126,14 +162,18 @@ export default function HomePage() {
         {HERO_SLIDES.map((slide, i) => (
           <div
             key={i}
-            className={`absolute inset-0 bg-gradient-to-br ${slide.bg} text-white transition-all duration-1000 flex items-center ${
+            className={`absolute inset-0 text-white transition-all duration-1000 flex items-center ${
               activeSlide === i ? "opacity-100 z-10 scale-100" : "opacity-0 z-0 scale-105"
             }`}
           >
-            {/* Background emoji */}
-            <div className="absolute inset-0 flex items-center justify-end pr-12 opacity-10 select-none pointer-events-none">
-              <span className="text-[20rem] leading-none">{slide.emoji}</span>
-            </div>
+            {/* Background Image */}
+            <div
+              className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+              style={{ backgroundImage: `url(${slide.image})` }}
+            />
+            {/* Overlay for contrast and readability */}
+            <div className={`absolute inset-0 bg-gradient-to-br ${slide.bg} opacity-40 mix-blend-multiply`} />
+            <div className="absolute inset-0 bg-black/30" />
 
             <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
               <div className="max-w-xl space-y-4 md:space-y-6">
@@ -209,7 +249,7 @@ export default function HomePage() {
 
       {/* ─────────── CATEGORY GRID ─────────── */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center space-y-2 mb-8">
+        <div className="text-center space-y-2 mb-10">
           <div className="flex items-center justify-center gap-2 text-candy-pink mb-2">
             <Sparkles className="h-4 w-4" />
             <span className="text-xs uppercase font-extrabold tracking-wider">Collections</span>
@@ -220,22 +260,37 @@ export default function HomePage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
-          {CATEGORIES.map((cat) => (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          {CATEGORIES.map((cat, i) => (
             <Link
               key={cat.slug}
               href={`/category/${cat.slug}`}
-              className={`group relative p-6 rounded-3xl bg-gradient-to-br ${cat.from} ${cat.to} border ${cat.border} hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden`}
+              className={`group relative rounded-3xl overflow-hidden h-64 md:h-80 shadow-lg hover:shadow-2xl ${cat.glow} transition-all duration-500 hover:-translate-y-2`}
+              style={{ animationDelay: `${i * 0.1}s` }}
             >
-              <div className="absolute -right-4 -bottom-4 text-7xl opacity-10 select-none">
-                {cat.emoji}
-              </div>
-              <span className="text-3xl mb-3 block">{cat.emoji}</span>
-              <h3 className={`text-lg font-extrabold ${cat.text}`}>{cat.name}</h3>
-              <p className="text-xs text-gray-500 mt-1">{cat.desc}</p>
-              <div className={`mt-4 inline-flex items-center gap-1 text-xs font-bold ${cat.text}`}>
-                Shop Now
-                <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
+              {/* Background Image with zoom on hover */}
+              <div
+                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 ease-out group-hover:scale-110"
+                style={{ backgroundImage: `url(${cat.image})` }}
+              />
+
+              {/* Gradient overlay */}
+              <div className={`absolute inset-0 bg-gradient-to-t ${cat.from} ${cat.to} opacity-60 group-hover:opacity-70 transition-opacity duration-500`} />
+              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-500" />
+
+              {/* Content slides up on hover */}
+              <div className="absolute inset-0 flex flex-col justify-end p-6 text-white">
+                <div className="transform translate-y-2 group-hover:translate-y-0 transition-transform duration-400">
+                  <span className="text-3xl mb-2 block drop-shadow-lg">{cat.emoji}</span>
+                  <h3 className="text-2xl font-black tracking-tight drop-shadow-md">{cat.name}</h3>
+                  <p className="text-sm text-white/80 mt-1 leading-relaxed">{cat.desc}</p>
+
+                  {/* Arrow button fades in on hover */}
+                  <div className="mt-3 inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white text-xs font-extrabold px-4 py-2 rounded-full opacity-0 group-hover:opacity-100 translate-y-3 group-hover:translate-y-0 transition-all duration-400">
+                    Shop Now
+                    <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </div>
               </div>
             </Link>
           ))}
@@ -276,37 +331,11 @@ export default function HomePage() {
         )}
       </section>
 
-      {/* ─────────── ON SALE NOW ─────────── */}
-      {onSale.length > 0 && (
-        <section className="bg-gradient-to-r from-rose-500 to-pink-600 py-12">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-end mb-8">
-              <div>
-                <span className="inline-flex items-center gap-1.5 bg-white/20 text-white text-xs font-extrabold uppercase px-3 py-1 rounded-full mb-2">
-                  🔥 Flash Sale
-                </span>
-                <h2 className="text-2xl md:text-3xl font-black text-white">Products On Sale</h2>
-              </div>
-              <Link
-                href="/offers"
-                className="text-sm font-extrabold text-white/80 hover:text-white flex items-center gap-1"
-              >
-                See All Offers
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-              {onSale.map((p) => (
-                <ProductCard key={p.productId} product={p} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+
 
       {/* ─────────── TIKTOK SECTION ─────────── */}
-      <section className="bg-gradient-to-br from-candy-purple via-purple-900 to-indigo-950 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <section className="bg-gradient-to-br from-candy-purple via-purple-900 to-indigo-950 text-white py-16 relative overflow-hidden">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
             <span className="inline-flex items-center gap-2 bg-white/15 text-white text-xs font-extrabold uppercase px-4 py-1.5 rounded-full tracking-wider">
               📱 Follow Us on TikTok
@@ -340,15 +369,15 @@ export default function HomePage() {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-4 pt-4 border-t border-white/10">
+            <div className="grid grid-cols-3 gap-4 pt-6">
               {[
                 { label: "TikTok Followers", value: "15K+" },
                 { label: "Products Listed", value: "120+" },
                 { label: "Orders Delivered", value: "5K+" },
               ].map(({ label, value }, i) => (
-                <div key={i}>
+                <div key={i} className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-4 text-center hover:bg-white/10 transition-colors">
                   <div className="text-2xl font-black text-white">{value}</div>
-                  <div className="text-xs text-purple-300 font-medium">{label}</div>
+                  <div className="text-[10px] text-cyan-200 font-bold uppercase tracking-wider mt-1">{label}</div>
                 </div>
               ))}
             </div>
@@ -356,7 +385,7 @@ export default function HomePage() {
 
           {/* Phone mockup */}
           <div className="hidden lg:flex justify-center">
-            <div className="relative w-64 h-[480px] bg-gray-900 rounded-[42px] border-4 border-gray-700 shadow-2xl overflow-hidden flex flex-col">
+            <div className="relative w-64 h-[480px] bg-gray-900 rounded-[42px] border-4 border-gray-700 shadow-[0_0_60px_rgba(6,182,212,0.15)] overflow-hidden flex flex-col animate-bounce" style={{ animationDuration: '4s' }}>
               {/* Status bar */}
               <div className="bg-black text-white flex justify-between items-center px-5 py-2 text-[9px] font-bold">
                 <span>9:41</span>
@@ -427,6 +456,52 @@ export default function HomePage() {
             ))}
           </div>
         )}
+      </section>
+
+      {/* ─────────── DISCOUNTS & SALES ─────────── */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 mb-16">
+        <div className="bg-gradient-to-br from-rose-500 via-pink-500 to-candy-pink rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden hover:shadow-candy-pink/20 transition-all duration-500 group">
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-0 left-0 w-64 h-64 bg-white rounded-full mix-blend-overlay filter blur-3xl opacity-50 animate-pulse" />
+            <div className="absolute bottom-0 right-0 w-64 h-64 bg-white rounded-full mix-blend-overlay filter blur-3xl opacity-50 animate-pulse" style={{ animationDelay: "2s" }} />
+          </div>
+          
+          <div className="relative z-10">
+            <div className="flex flex-col md:flex-row justify-between items-center md:items-end mb-10 gap-6">
+              <div className="text-center md:text-left text-white">
+                <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white text-xs font-extrabold uppercase px-4 py-1.5 rounded-full mb-4 group-hover:-translate-y-1 transition-transform">
+                  <Star className="h-4 w-4 fill-yellow-300 text-yellow-300" />
+                  Limited Time Offers
+                </div>
+                <h2 className="text-3xl md:text-4xl font-black mb-2">Discounts & Sales</h2>
+                <p className="text-white/80 font-medium max-w-md">Grab our sweetest deals before they disappear. Exclusive discounts on your favorite treats!</p>
+              </div>
+              <Link
+                href="/offers"
+                className="bg-white text-candy-pink font-extrabold px-6 py-3 rounded-full hover:bg-gray-50 shadow-lg transition-all hover:-translate-y-1 hover:shadow-xl flex items-center gap-2 text-sm"
+              >
+                View All Offers
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+
+            {loading ? (
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                {[1, 2, 3, 4].map((n) => (
+                  <div key={n} className="animate-pulse bg-white/20 rounded-2xl h-80" />
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                {onSale.map((p) => (
+                  <div key={p.productId} className="group/card hover:-translate-y-2 transition-transform duration-300">
+                    <ProductCard product={p} />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       </section>
 
       {/* ─────────── TESTIMONIALS ─────────── */}

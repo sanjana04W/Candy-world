@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import emailjs from "@emailjs/browser";
 import { useRouter } from "next/navigation";
 import { useShop } from "@/context/ShopContext";
 import { getDBService } from "@/lib/firebase";
@@ -11,6 +12,15 @@ export default function CheckoutPage() {
   const { cart, getCartSubtotal, getCartTotalWeight, clearCart } = useShop();
   const router = useRouter();
   const dbService = getDBService();
+
+  // Pre-initialize EmailJS as soon as the page mounts so it's warm and ready
+  useEffect(() => {
+    try {
+      emailjs.init("OyFOVHnKDcQ3-Iqs8");
+    } catch (e) {
+      // Already initialized, ignore
+    }
+  }, []);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -76,12 +86,15 @@ export default function CheckoutPage() {
       const code = Math.floor(100000 + Math.random() * 900000).toString();
       setVerificationCode(code);
 
-      const sent = await sendVerificationCodeEmail(formData.email, formData.name, code);
-      if (sent) {
-        setIsVerifying(true);
-      } else {
-        setError("Failed to send verification email. Please try again.");
-      }
+      // Fire verification email non-blocking — don't await, show the OTP screen immediately
+      sendVerificationCodeEmail(formData.email, formData.name, code)
+        .then(sent => {
+          if (!sent) console.warn("Verification email failed silently, code was set.");
+        })
+        .catch(err => console.error("Verification email error:", err));
+
+      // Show OTP screen right away without waiting for email delivery
+      setIsVerifying(true);
     } catch (err) {
       console.error(err);
       setError("An error occurred during verification setup.");
@@ -126,11 +139,14 @@ export default function CheckoutPage() {
         internalNotes: formData.orderNotes ? `[Customer Notes] ${formData.orderNotes}` : ""
       };
 
-      // Create order
+      // Create order in DB
       const newOrder = await dbService.createOrder(orderPayload);
       
-      // Fire integrations triggers
-      await sendOrderNotificationEmail(newOrder);
+      // Fire all integrations as non-blocking — user is redirected immediately
+      // Emails go out in the background without blocking the UX
+      sendOrderNotificationEmail(newOrder).catch(err =>
+        console.warn("Order notification email failed:", err)
+      );
       triggerPixelEvent("Purchase", {
         value: total,
         currency: "LKR",
@@ -138,10 +154,8 @@ export default function CheckoutPage() {
         content_type: "product"
       });
 
-      // Clear Cart state
+      // Clear cart and navigate immediately
       clearCart();
-      
-      // Navigate to confirmation page
       router.push(`/checkout/confirmation?orderId=${newOrder.orderId}`);
     } catch (err) {
       console.error(err);

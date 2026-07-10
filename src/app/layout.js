@@ -1,6 +1,7 @@
 import { ShopProvider } from "@/context/ShopContext";
 import { AuthProvider } from "@/context/AuthContext";
 import ConditionalLayout from "@/components/ConditionalLayout";
+import CandyCursor from "@/components/CandyCursor";
 import "./globals.css";
 
 export const metadata = {
@@ -27,6 +28,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className="scroll-smooth">
       <body className="min-h-screen bg-white flex flex-col antialiased">
+        <CandyCursor />
         <AuthProvider>
           <ShopProvider>
             <ConditionalLayout>{children}</ConditionalLayout>
