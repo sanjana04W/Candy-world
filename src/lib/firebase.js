@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
+import { getFirestore, doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile as fbUpdateProfile } from "firebase/auth";
 import { getStorage } from "firebase/storage";
 
 // Default configuration with placeholder values.
@@ -1130,13 +1130,39 @@ export const getDBService = () => {
       return false;
     },
 
-    // --- Customers ---
+    // --- Customers (Firebase Auth + Firestore when real Firebase, localStorage fallback) ---
     getCustomers: async () => {
       return getMockData("customers", []);
     },
     registerCustomer: async (customerData) => {
+      if (isRealFirebase) {
+        // Real Firebase: create user in Firebase Auth + store profile in Firestore
+        const firebaseAuth = getAuth();
+        const firestore = getFirestore();
+        const credential = await createUserWithEmailAndPassword(
+          firebaseAuth,
+          customerData.email,
+          customerData.password
+        );
+        const uid = credential.user.uid;
+        // Update display name
+        await fbUpdateProfile(credential.user, { displayName: customerData.name });
+        // Store extra profile fields in Firestore
+        const profileData = {
+          customerId: uid,
+          name: customerData.name,
+          email: customerData.email,
+          phone: customerData.phone || "",
+          addresses: [],
+          totalOrdersCount: 0,
+          lifetimeValue: 0,
+          createdAt: new Date().toISOString(),
+        };
+        await setDoc(doc(firestore, "customers", uid), profileData);
+        return profileData;
+      }
+      // Demo fallback: localStorage
       const customers = getMockData("customers", []);
-      // Check if email already exists
       if (customers.find(c => c.email === customerData.email)) {
         throw new Error("Email already registered");
       }
@@ -1147,18 +1173,35 @@ export const getDBService = () => {
         totalOrdersCount: 0,
         lifetimeValue: 0,
         createdAt: new Date(),
-        // Mocking a password hash by storing plain text for local demo
       };
       customers.push(newCustomer);
       saveMockData("customers", customers);
-      
-      // Auto-login
       if (typeof window !== "undefined") {
         localStorage.setItem("candy_world_logged_customer", JSON.stringify(newCustomer));
       }
       return newCustomer;
     },
     loginCustomer: async (email, password) => {
+      if (isRealFirebase) {
+        // Real Firebase: sign in via Firebase Auth
+        const firebaseAuth = getAuth();
+        const firestore = getFirestore();
+        const credential = await signInWithEmailAndPassword(firebaseAuth, email, password);
+        const uid = credential.user.uid;
+        // Fetch full profile from Firestore
+        const profileSnap = await getDoc(doc(firestore, "customers", uid));
+        if (profileSnap.exists()) {
+          return { ...profileSnap.data(), uid };
+        }
+        // Profile doesn't exist yet (e.g. old user), return basic info
+        return {
+          customerId: uid,
+          name: credential.user.displayName || email,
+          email: credential.user.email,
+          uid,
+        };
+      }
+      // Demo fallback: localStorage
       const customers = getMockData("customers", []);
       const user = customers.find(c => c.email === email && c.password === password);
       if (user) {
@@ -1170,16 +1213,48 @@ export const getDBService = () => {
       throw new Error("Invalid email or password");
     },
     getCurrentCustomer: () => {
+      if (isRealFirebase) {
+        // In real Firebase mode, session is managed by Firebase Auth.
+        // The AuthContext subscribes to onAuthStateChanged for persistence.
+        // This sync method only checks localStorage cache set by AuthContext.
+        if (typeof window === "undefined") return null;
+        const cached = localStorage.getItem("candy_world_fb_customer");
+        return cached ? JSON.parse(cached) : null;
+      }
+      // Demo fallback
       if (typeof window === "undefined") return null;
       const user = localStorage.getItem("candy_world_logged_customer");
       return user ? JSON.parse(user) : null;
     },
-    logoutCustomer: () => {
+    logoutCustomer: async () => {
+      if (isRealFirebase) {
+        const firebaseAuth = getAuth();
+        await signOut(firebaseAuth);
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("candy_world_fb_customer");
+        }
+        return;
+      }
+      // Demo fallback
       if (typeof window !== "undefined") {
         localStorage.removeItem("candy_world_logged_customer");
       }
     },
     updateCustomer: async (email, updatedFields) => {
+      if (isRealFirebase) {
+        const firebaseAuth = getAuth();
+        const firestore = getFirestore();
+        const uid = firebaseAuth.currentUser?.uid;
+        if (!uid) throw new Error("Not logged in");
+        await updateDoc(doc(firestore, "customers", uid), updatedFields);
+        const snap = await getDoc(doc(firestore, "customers", uid));
+        const updated = snap.data();
+        if (typeof window !== "undefined") {
+          localStorage.setItem("candy_world_fb_customer", JSON.stringify(updated));
+        }
+        return updated;
+      }
+      // Demo fallback
       const customers = getMockData("customers", []);
       const index = customers.findIndex(c => c.email === email);
       if (index > -1) {
@@ -1192,6 +1267,34 @@ export const getDBService = () => {
         return updatedUser;
       }
       throw new Error("User not found");
+    },
+    // Export onAuthStateChanged for AuthContext to use
+    onAuthStateChanged: (callback) => {
+      if (isRealFirebase) {
+        const firebaseAuth = getAuth();
+        const firestore = getFirestore();
+        return onAuthStateChanged(firebaseAuth, async (fbUser) => {
+          if (fbUser) {
+            // Fetch Firestore profile
+            const snap = await getDoc(doc(firestore, "customers", fbUser.uid));
+            const profile = snap.exists()
+              ? { ...snap.data(), uid: fbUser.uid }
+              : { customerId: fbUser.uid, name: fbUser.displayName, email: fbUser.email, uid: fbUser.uid };
+            // Cache locally so getCurrentCustomer works synchronously
+            if (typeof window !== "undefined") {
+              localStorage.setItem("candy_world_fb_customer", JSON.stringify(profile));
+            }
+            callback(profile);
+          } else {
+            if (typeof window !== "undefined") {
+              localStorage.removeItem("candy_world_fb_customer");
+            }
+            callback(null);
+          }
+        });
+      }
+      // Demo fallback: no real-time subscription needed
+      return () => {};
     },
 
     // --- Promotions ---

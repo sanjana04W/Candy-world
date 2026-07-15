@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getDBService } from "@/lib/firebase";
+import { sendStatusUpdateEmail } from "@/lib/integrations";
 import {
   ClipboardList, PackagePlus, AlertTriangle, BarChart3, Tag,
   LogOut, UserCheck, Plus, Trash2, Edit3, MessageSquare, Users,
@@ -648,6 +649,13 @@ export default function AdminDashboard() {
       ? "Cancelled by operations staff."
       : `Status updated to ${newStatus}`;
     await dbService.updateOrderStatus(orderId, newStatus, note, newStatus === "Dispatched" ? riderInfo : "");
+    
+    // Automatically trigger email notification to the customer for status change
+    const updatedOrder = orders.find(o => o.orderId === orderId);
+    if (updatedOrder) {
+      sendStatusUpdateEmail(updatedOrder, newStatus, newStatus === "Dispatched" ? riderInfo : "").catch(err => console.warn("Failed to send status email:", err));
+    }
+    
     setRiderInfo("");
     loadAll();
   };

@@ -46,6 +46,9 @@ module.exports = {
           '100%': { opacity: '0', transform: 'translate(-50%, -200%) scale(1.2)' },
         },
       },
+      transitionDuration: {
+        '400': '400ms',
+      },
     },
   },
   plugins: [],

@@ -112,3 +112,35 @@ export const sendVerificationCodeEmail = async (email, name, code) => {
     return false;
   }
 };
+
+export const sendStatusUpdateEmail = async (order, newStatus, riderInfo = "") => {
+  const settings = getSettingsSync();
+  const serviceId = settings.emailjsServiceId || "service_wanl11i";
+  const templateId = settings.emailjsTemplateId || "template_j03vo2h";
+  const publicKey = settings.emailjsPublicKey || "OyFOVHnKDcQ3-Iqs8";
+
+  console.log(`➡️ [EmailJS Status] (${serviceId}): Dispatching status update email for order ${order.orderId} to`, order.customerInfo.email);
+  
+  const templateParams = {
+    to_email: order.customerInfo.email,
+    customer_name: order.customerInfo.name,
+    order_number: order.orderNumber || order.orderId,
+    order_status: newStatus,
+    courier_info: riderInfo ? `Courier: ${riderInfo}` : "",
+    message: `Your order status has been updated to: ${newStatus}`
+  };
+
+  try {
+    await emailjs.send(
+      serviceId,
+      templateId,
+      templateParams,
+      publicKey
+    );
+    console.log("EmailJS status update successfully sent!");
+    return true;
+  } catch (error) {
+    console.warn("EmailJS status update failed, using console fallback:", error);
+    return false;
+  }
+};
