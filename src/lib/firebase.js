@@ -929,6 +929,23 @@ const getMockData = async (key, defaultVal) => {
     const res = await fetch('/api/mockDb');
     const db = await res.json();
     mockDbCache = db;
+    
+    // Auto-migrate from localStorage if server has empty array and local has data
+    if (db[key] && Array.isArray(db[key]) && db[key].length === 0) {
+      const local = localStorage.getItem(`candy_world_${key}`);
+      if (local) {
+        const parsedLocal = JSON.parse(local);
+        if (Array.isArray(parsedLocal) && parsedLocal.length > 0) {
+          await fetch('/api/mockDb', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ key, data: parsedLocal })
+          });
+          return parsedLocal;
+        }
+      }
+    }
+
     if (db[key]) return db[key];
     
     // Auto-initialize with default if missing
