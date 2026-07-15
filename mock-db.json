@@ -1,0 +1,1096 @@
+{
+  "products": [
+    {
+      "productId": "prod-1",
+      "name": "Sour Patch Kids (Original)",
+      "slug": "sour-patch-kids-original",
+      "categoryId": "candy",
+      "subCategoryId": "candy-sour",
+      "description": "First they're sour, then they're sweet! Soft & chewy candy imported directly from the US. Perfect for kids and adults alike.",
+      "basePrice": 1200,
+      "salePrice": 950,
+      "weight": 140,
+      "images": [
+        "/images/products/sour-patch.jpg"
+      ],
+      "stockLevel": 15,
+      "lowStockThreshold": 5,
+      "stockStatus": "instock",
+      "isFeatured": true,
+      "isNewArrival": false,
+      "status": "active",
+      "variants": [
+        {
+          "variantId": "v1-1",
+          "name": "140g Pack",
+          "price": 950,
+          "stockLevel": 10
+        },
+        {
+          "variantId": "v1-2",
+          "name": "250g Share Pack",
+          "price": 1600,
+          "stockLevel": 5
+        }
+      ]
+    },
+    {
+      "productId": "prod-2",
+      "name": "Haribo Goldbears Gummy Candy",
+      "slug": "haribo-goldbears",
+      "categoryId": "candy",
+      "subCategoryId": "candy-gummy",
+      "description": "The original gummy bear that started it all. Contains 5 delicious fruit flavors: Lemon, Orange, Pineapple, Raspberry, and Strawberry.",
+      "basePrice": 850,
+      "salePrice": null,
+      "weight": 100,
+      "images": [
+        "/images/products/haribo-goldbears.jpg"
+      ],
+      "stockLevel": 4,
+      "lowStockThreshold": 5,
+      "stockStatus": "lowstock",
+      "isFeatured": true,
+      "isNewArrival": true,
+      "status": "active",
+      "variants": []
+    },
+    {
+      "productId": "prod-3",
+      "name": "Giant Rainbow Lollipop",
+      "slug": "giant-rainbow-lollipop",
+      "categoryId": "candy",
+      "subCategoryId": "candy-novelty",
+      "description": "A colossal swirl lollipop featuring a rainbow design and a sweet, classic fruit flavor. Perfect for party favors and gifts.",
+      "basePrice": 450,
+      "salePrice": null,
+      "weight": 85,
+      "images": [
+        "/images/products/rainbow-lollipop.jpg"
+      ],
+      "stockLevel": 0,
+      "lowStockThreshold": 5,
+      "stockStatus": "outofstock",
+      "isFeatured": false,
+      "isNewArrival": false,
+      "status": "active",
+      "variants": []
+    },
+    {
+      "productId": "prod-4",
+      "name": "Toblerone Swiss Milk Chocolate",
+      "slug": "toblerone-swiss-milk",
+      "categoryId": "chocolate",
+      "subCategoryId": "chocolate-imported",
+      "description": "Iconic triangular Swiss milk chocolate bar with honey and almond nougat. Imported from Switzerland.",
+      "basePrice": 1100,
+      "salePrice": 890,
+      "weight": 100,
+      "images": [
+        "/images/products/toblerone.jpg"
+      ],
+      "stockLevel": 35,
+      "lowStockThreshold": 8,
+      "stockStatus": "instock",
+      "isFeatured": true,
+      "isNewArrival": false,
+      "status": "active",
+      "variants": [
+        {
+          "variantId": "v4-1",
+          "name": "Milk Chocolate 100g",
+          "price": 890,
+          "stockLevel": 20
+        },
+        {
+          "variantId": "v4-2",
+          "name": "Dark Chocolate 100g",
+          "price": 950,
+          "stockLevel": 15
+        }
+      ]
+    },
+    {
+      "productId": "prod-5",
+      "name": "Ferrero Rocher Gift Box (16 Pcs)",
+      "slug": "ferrero-rocher-16",
+      "categoryId": "chocolate",
+      "subCategoryId": "chocolate-gift",
+      "description": "A whole hazelnut, dipped in smooth chocolaty filling, surrounded by a crispy wafer shell and covered in milk chocolate.",
+      "basePrice": 3200,
+      "salePrice": 2850,
+      "weight": 200,
+      "images": [
+        "/images/products/ferrero-16.jpg"
+      ],
+      "stockLevel": 12,
+      "lowStockThreshold": 4,
+      "stockStatus": "instock",
+      "isFeatured": true,
+      "isNewArrival": true,
+      "status": "active",
+      "variants": []
+    },
+    {
+      "productId": "prod-8",
+      "name": "Pringles Sour Cream & Onion",
+      "slug": "pringles-sour-cream-onion",
+      "categoryId": "gourmet",
+      "subCategoryId": "gourmet-snacks",
+      "description": "The awesome flavor of sour cream, onion and potato together can't be measured by modern science. Imported stackable chips.",
+      "basePrice": 950,
+      "salePrice": 790,
+      "weight": 165,
+      "images": [
+        "/images/products/pringles-sour.jpg"
+      ],
+      "stockLevel": 18,
+      "lowStockThreshold": 5,
+      "stockStatus": "instock",
+      "isFeatured": true,
+      "isNewArrival": false,
+      "status": "active",
+      "variants": []
+    },
+    {
+      "productId": "prod-9",
+      "name": "Nutella Hazelnut Spread",
+      "slug": "nutella-hazelnut-spread",
+      "categoryId": "gourmet",
+      "subCategoryId": "gourmet-spreads",
+      "description": "Original creamy hazelnut cocoa spread that turns a simple snack into an extraordinary treat. Great with pancakes and bread.",
+      "basePrice": 2400,
+      "salePrice": null,
+      "weight": 350,
+      "images": [
+        "/images/products/nutella.jpg"
+      ],
+      "stockLevel": 3,
+      "lowStockThreshold": 5,
+      "stockStatus": "lowstock",
+      "isFeatured": false,
+      "isNewArrival": false,
+      "status": "active",
+      "variants": []
+    },
+    {
+      "productId": "prod-10",
+      "name": "Classic Jelly Beans",
+      "slug": "classic-jelly-beans",
+      "categoryId": "candy",
+      "subCategoryId": "candy-gummy",
+      "description": "Assorted fruit flavored gourmet jelly beans. Chewy, sweet, and bursting with colorful flavors.",
+      "basePrice": 650,
+      "salePrice": null,
+      "weight": 150,
+      "images": [
+        "https://images.unsplash.com/photo-1581798459219-318e76aecc7b?auto=format&fit=crop&w=600&q=80"
+      ],
+      "stockLevel": 25,
+      "lowStockThreshold": 5,
+      "stockStatus": "instock",
+      "isFeatured": false,
+      "isNewArrival": true,
+      "status": "active",
+      "variants": []
+    },
+    {
+      "productId": "prod-11",
+      "name": "Mix Gummy Cup",
+      "slug": "mix-gummy-cup",
+      "categoryId": "candy",
+      "subCategoryId": "candy-pick-mix",
+      "description": "A fun cup filled to the brim with an assortment of our best gummy candies. Perfect for sweet tooth cravings.",
+      "basePrice": 850,
+      "salePrice": 750,
+      "weight": 250,
+      "images": [
+        "/images/products/Mix Gummy Cup.jpg"
+      ],
+      "stockLevel": 30,
+      "lowStockThreshold": 5,
+      "stockStatus": "instock",
+      "isFeatured": true,
+      "isNewArrival": false,
+      "status": "active",
+      "variants": []
+    },
+    {
+      "productId": "prod-12",
+      "name": "Kit Kat Chocolate Bouquet",
+      "slug": "kit-kat-bouquet",
+      "categoryId": "chocolate",
+      "subCategoryId": "chocolate-gift",
+      "description": "An elegant, handcrafted bouquet made entirely of delicious Kit Kat bars. The ultimate gift for chocolate lovers.",
+      "basePrice": 3800,
+      "salePrice": null,
+      "weight": 450,
+      "images": [
+        "/images/products/kitkat-bouquet.jpg"
+      ],
+      "stockLevel": 10,
+      "lowStockThreshold": 3,
+      "stockStatus": "instock",
+      "isFeatured": true,
+      "isNewArrival": true,
+      "status": "active",
+      "variants": []
+    },
+    {
+      "productId": "prod-13",
+      "name": "Mini Gummies Pack",
+      "slug": "mini-gummies-pack",
+      "categoryId": "candy",
+      "subCategoryId": "candy-gummy",
+      "description": "Bite-sized mini gummy candies in various fruit shapes. Soft, chewy, and highly addictive.",
+      "basePrice": 400,
+      "salePrice": null,
+      "weight": 80,
+      "images": [
+        "/images/products/Mini Gummies Pack.jpg"
+      ],
+      "stockLevel": 40,
+      "lowStockThreshold": 5,
+      "stockStatus": "instock",
+      "isFeatured": false,
+      "isNewArrival": false,
+      "status": "active",
+      "variants": []
+    },
+    {
+      "productId": "prod-14",
+      "name": "Coca Cola Gummies",
+      "slug": "coca-cola-gummies",
+      "categoryId": "candy",
+      "subCategoryId": "candy-gummy",
+      "description": "Classic cola bottle shaped gummies with a refreshing and sweet cola taste.",
+      "basePrice": 500,
+      "salePrice": null,
+      "weight": 120,
+      "images": [
+        "/images/products/Coca Cola Gummies.jpg"
+      ],
+      "stockLevel": 35,
+      "lowStockThreshold": 5,
+      "stockStatus": "instock",
+      "isFeatured": false,
+      "isNewArrival": false,
+      "status": "active",
+      "variants": []
+    },
+    {
+      "productId": "prod-15",
+      "name": "Classic Gummy Bears",
+      "slug": "classic-gummy-bears",
+      "categoryId": "candy",
+      "subCategoryId": "candy-gummy",
+      "description": "Traditional soft and delicious gummy bears in classic fruit flavors.",
+      "basePrice": 550,
+      "salePrice": 480,
+      "weight": 150,
+      "images": [
+        "https://images.unsplash.com/photo-1582058091505-f87a2e55a40f?auto=format&fit=crop&w=600&q=80"
+      ],
+      "stockLevel": 50,
+      "lowStockThreshold": 10,
+      "stockStatus": "instock",
+      "isFeatured": true,
+      "isNewArrival": false,
+      "status": "active",
+      "variants": []
+    },
+    {
+      "productId": "prod-16",
+      "name": "Fried Egg Gummy Candy",
+      "slug": "fried-egg-gummy",
+      "categoryId": "candy",
+      "subCategoryId": "candy-gummy",
+      "description": "Fun, fried-egg shaped sweet gummies with a soft white foam back and a fruity yolk.",
+      "basePrice": 480,
+      "salePrice": null,
+      "weight": 100,
+      "images": [
+        "/images/products/Fried Egg Gummy Candy.jpg"
+      ],
+      "stockLevel": 15,
+      "lowStockThreshold": 5,
+      "stockStatus": "instock",
+      "isFeatured": false,
+      "isNewArrival": false,
+      "status": "active",
+      "variants": []
+    },
+    {
+      "productId": "prod-17",
+      "name": "Sweet Berry Gummies",
+      "slug": "sweet-berry-gummies",
+      "categoryId": "candy",
+      "subCategoryId": "candy-gummy",
+      "description": "Raspberry and blackberry shaped crunchy sugar pearl coated soft gummies.",
+      "basePrice": 600,
+      "salePrice": null,
+      "weight": 120,
+      "images": [
+        "/images/products/Sweet Berry Gummies.jpg"
+      ],
+      "stockLevel": 22,
+      "lowStockThreshold": 5,
+      "stockStatus": "instock",
+      "isFeatured": false,
+      "isNewArrival": false,
+      "status": "active",
+      "variants": []
+    },
+    {
+      "productId": "prod-18",
+      "name": "Mini Burger Gummy",
+      "slug": "mini-burger-gummy",
+      "categoryId": "candy",
+      "subCategoryId": "candy-novelty",
+      "description": "Individually wrapped mini gummy burgers. Layered with detailed bun, cheese, and lettuce shapes.",
+      "basePrice": 350,
+      "salePrice": null,
+      "weight": 50,
+      "images": [
+        "/images/products/Mini Burger Gummy.jpg"
+      ],
+      "stockLevel": 60,
+      "lowStockThreshold": 10,
+      "stockStatus": "instock",
+      "isFeatured": false,
+      "isNewArrival": false,
+      "status": "active",
+      "variants": []
+    },
+    {
+      "productId": "prod-19",
+      "name": "Crocodile Gummy Candy",
+      "slug": "crocodile-gummy",
+      "categoryId": "candy",
+      "subCategoryId": "candy-novelty",
+      "description": "Giant crocodile shaped gummies with a sweet marshmallow underbelly and fruity top.",
+      "basePrice": 650,
+      "salePrice": null,
+      "weight": 150,
+      "images": [
+        "/images/products/Crocodile Gummy Candy.jpg"
+      ],
+      "stockLevel": 18,
+      "lowStockThreshold": 5,
+      "stockStatus": "instock",
+      "isFeatured": false,
+      "isNewArrival": false,
+      "status": "active",
+      "variants": []
+    },
+    {
+      "productId": "prod-20",
+      "name": "Sour Cola Gummies",
+      "slug": "sour-cola-gummies",
+      "categoryId": "candy",
+      "subCategoryId": "candy-sour",
+      "description": "Fizzy, sour sugar-coated cola bottles that pack a tangy punch.",
+      "basePrice": 550,
+      "salePrice": 490,
+      "weight": 120,
+      "images": [
+        "/images/products/Sour Cola Gummies.jpg"
+      ],
+      "stockLevel": 28,
+      "lowStockThreshold": 5,
+      "stockStatus": "instock",
+      "isFeatured": false,
+      "isNewArrival": false,
+      "status": "active",
+      "variants": []
+    },
+    {
+      "productId": "prod-21",
+      "name": "Rainbow Frizz Gummy",
+      "slug": "rainbow-frizz-gummy",
+      "categoryId": "candy",
+      "subCategoryId": "candy-sour",
+      "description": "Colorful sour belts with rainbow stripes coated in dynamic sour powder.",
+      "basePrice": 600,
+      "salePrice": null,
+      "weight": 100,
+      "images": [
+        "/images/products/rainbow.jpg"
+      ],
+      "stockLevel": 30,
+      "lowStockThreshold": 5,
+      "stockStatus": "instock",
+      "isFeatured": false,
+      "isNewArrival": true,
+      "status": "active",
+      "variants": []
+    },
+    {
+      "productId": "prod-22",
+      "name": "Spooky Gummy Eyeballs",
+      "slug": "gummy-eye-ball",
+      "categoryId": "candy",
+      "subCategoryId": "candy-novelty",
+      "description": "Individually packed gummy eyeballs with a liquid sour fruit center. A viral TikTok favorite!",
+      "basePrice": 750,
+      "salePrice": null,
+      "weight": 75,
+      "images": [
+        "/images/products/Spooky Gummy Eyeballs.jpg"
+      ],
+      "stockLevel": 14,
+      "lowStockThreshold": 5,
+      "stockStatus": "instock",
+      "isFeatured": true,
+      "isNewArrival": false,
+      "status": "active",
+      "variants": []
+    },
+    {
+      "productId": "prod-23",
+      "name": "Watermelon Gummy Ball",
+      "slug": "watermelon-gummy-ball",
+      "categoryId": "candy",
+      "subCategoryId": "candy-novelty",
+      "description": "Watermelon flavored round liquid-filled soft gummy balls.",
+      "basePrice": 650,
+      "salePrice": null,
+      "weight": 90,
+      "images": [
+        "/images/products/Watermelon Gummy Ball.jpg"
+      ],
+      "stockLevel": 22,
+      "lowStockThreshold": 5,
+      "stockStatus": "instock",
+      "isFeatured": false,
+      "isNewArrival": false,
+      "status": "active",
+      "variants": []
+    },
+    {
+      "productId": "prod-24",
+      "name": "Gold Chocolate Coins",
+      "slug": "chocolate-coin",
+      "categoryId": "chocolate",
+      "subCategoryId": "chocolate-snacks",
+      "description": "Classic milk chocolate coins wrapped in shiny gold foil wrapper.",
+      "basePrice": 450,
+      "salePrice": null,
+      "weight": 70,
+      "images": [
+        "/images/products/Gold Chocolate Coins.jpg"
+      ],
+      "stockLevel": 50,
+      "lowStockThreshold": 10,
+      "stockStatus": "instock",
+      "isFeatured": false,
+      "isNewArrival": false,
+      "status": "active",
+      "variants": []
+    },
+    {
+      "productId": "prod-25",
+      "name": "Coffee Nut Hard Candy",
+      "slug": "coffee-nut-candy",
+      "categoryId": "candy",
+      "subCategoryId": "candy-hard",
+      "description": "Rich, aromatic coffee flavored hard candies with a crunchy nut center.",
+      "basePrice": 700,
+      "salePrice": null,
+      "weight": 180,
+      "images": [
+        "/images/products/Coffee Nut Hard Candy.jpg"
+      ],
+      "stockLevel": 15,
+      "lowStockThreshold": 5,
+      "stockStatus": "instock",
+      "isFeatured": false,
+      "isNewArrival": false,
+      "status": "active",
+      "variants": []
+    },
+    {
+      "productId": "prod-26",
+      "name": "Kit Kat Chunky Bar",
+      "slug": "kit-kat-bar",
+      "categoryId": "chocolate",
+      "subCategoryId": "chocolate-imported",
+      "description": "Crispy wafer bar covered in smooth, thick milk chocolate. Single bar.",
+      "basePrice": 380,
+      "salePrice": null,
+      "weight": 40,
+      "images": [
+        "/images/products/Kit Kat Chunky Bar.jpg"
+      ],
+      "stockLevel": 100,
+      "lowStockThreshold": 15,
+      "stockStatus": "instock",
+      "isFeatured": false,
+      "isNewArrival": false,
+      "status": "active",
+      "variants": []
+    },
+    {
+      "productId": "prod-27",
+      "name": "Popin Cookin Candy Kit",
+      "slug": "popin-candy",
+      "categoryId": "candy",
+      "subCategoryId": "candy-novelty",
+      "description": "DIY Japanese candy kit. Create your own mini sweets with edible powders and water.",
+      "basePrice": 1600,
+      "salePrice": 1450,
+      "weight": 120,
+      "images": [
+        "/images/products/Popin Cookin Candy Kit.jpg"
+      ],
+      "stockLevel": 8,
+      "lowStockThreshold": 3,
+      "stockStatus": "instock",
+      "isFeatured": true,
+      "isNewArrival": false,
+      "status": "active",
+      "variants": []
+    },
+    {
+      "productId": "prod-28",
+      "name": "Strawberry Gummy Ball",
+      "slug": "strawberry-gummy-ball",
+      "categoryId": "candy",
+      "subCategoryId": "candy-novelty",
+      "description": "Round, chewy strawberry liquid-filled gummy spheres.",
+      "basePrice": 650,
+      "salePrice": null,
+      "weight": 90,
+      "images": [
+        "/images/products/Strawberry Gummy Ball.jpg"
+      ],
+      "stockLevel": 20,
+      "lowStockThreshold": 5,
+      "stockStatus": "instock",
+      "isFeatured": false,
+      "isNewArrival": false,
+      "status": "active",
+      "variants": []
+    },
+    {
+      "productId": "prod-29",
+      "name": "Imported Strawberry Oreo",
+      "slug": "strawberry-oreo",
+      "categoryId": "gourmet",
+      "subCategoryId": "gourmet-biscuits",
+      "description": "Crispy dark chocolate sandwich cookies filled with rich strawberry cream.",
+      "basePrice": 850,
+      "salePrice": null,
+      "weight": 120,
+      "images": [
+        "/images/products/Imported Strawberry Oreo.jpg"
+      ],
+      "stockLevel": 18,
+      "lowStockThreshold": 5,
+      "stockStatus": "instock",
+      "isFeatured": false,
+      "isNewArrival": true,
+      "status": "active",
+      "variants": []
+    },
+    {
+      "productId": "prod-30",
+      "name": "Chewy Sour Candy Balls",
+      "slug": "chew-sour-candy",
+      "categoryId": "candy",
+      "subCategoryId": "candy-sour",
+      "description": "Super sour chewy candy balls with intense fruit centers.",
+      "basePrice": 500,
+      "salePrice": null,
+      "weight": 100,
+      "images": [
+        "/images/products/Chewy Sour Candy Balls.jpg"
+      ],
+      "stockLevel": 45,
+      "lowStockThreshold": 10,
+      "stockStatus": "instock",
+      "isFeatured": false,
+      "isNewArrival": false,
+      "status": "active",
+      "variants": []
+    },
+    {
+      "productId": "prod-31",
+      "name": "Sprite Toffee Candy",
+      "slug": "sprite-toffee",
+      "categoryId": "candy",
+      "subCategoryId": "candy-hard",
+      "description": "Lemon-lime soda flavored hard toffees. Refreshing and sweet.",
+      "basePrice": 600,
+      "salePrice": null,
+      "weight": 150,
+      "images": [
+        "/images/products/Sprite Toffee Candy.jpg"
+      ],
+      "stockLevel": 30,
+      "lowStockThreshold": 5,
+      "stockStatus": "instock",
+      "isFeatured": false,
+      "isNewArrival": false,
+      "status": "active",
+      "variants": []
+    },
+    {
+      "productId": "prod-32",
+      "name": "Goods Premium Chocolate",
+      "slug": "goods-chocolate",
+      "categoryId": "chocolate",
+      "subCategoryId": "chocolate-imported",
+      "description": "Smooth, velvety premium imported dark milk chocolate bar.",
+      "basePrice": 1200,
+      "salePrice": 1050,
+      "weight": 100,
+      "images": [
+        "/images/products/Goods Premium Chocolate.jpg"
+      ],
+      "stockLevel": 25,
+      "lowStockThreshold": 5,
+      "stockStatus": "instock",
+      "isFeatured": false,
+      "isNewArrival": false,
+      "status": "active",
+      "variants": []
+    },
+    {
+      "productId": "prod-33",
+      "name": "Cadbury Dairy Milk Chocolate",
+      "slug": "dairy-milk-chocolate",
+      "categoryId": "chocolate",
+      "subCategoryId": "chocolate-imported",
+      "description": "Classic smooth and creamy Cadbury Dairy Milk chocolate bar from the UK.",
+      "basePrice": 750,
+      "salePrice": null,
+      "weight": 110,
+      "images": [
+        "/images/products/Cadbury Dairy Milk Chocolate.jpg"
+      ],
+      "stockLevel": 60,
+      "lowStockThreshold": 10,
+      "stockStatus": "instock",
+      "isFeatured": true,
+      "isNewArrival": false,
+      "status": "active",
+      "variants": []
+    },
+    {
+      "productId": "prod-34",
+      "name": "Snickers Chocolate Bar",
+      "slug": "snickers",
+      "categoryId": "chocolate",
+      "subCategoryId": "chocolate-imported",
+      "description": "Milk chocolate, peanuts, caramel, and nougat bar. Full-sized imported bar.",
+      "basePrice": 420,
+      "salePrice": null,
+      "weight": 50,
+      "images": [
+        "/images/products/Snickers Chocolate Bar.jpg"
+      ],
+      "stockLevel": 80,
+      "lowStockThreshold": 10,
+      "stockStatus": "instock",
+      "isFeatured": false,
+      "isNewArrival": false,
+      "status": "active",
+      "variants": []
+    },
+    {
+      "productId": "prod-35",
+      "name": "Mixed Candy Party Cup",
+      "slug": "mix-candy-cup",
+      "categoryId": "candy",
+      "subCategoryId": "candy-pick-mix",
+      "description": "An assortment of hard, chewy, and sour candies inside a fun party cup.",
+      "basePrice": 900,
+      "salePrice": null,
+      "weight": 250,
+      "images": [
+        "/images/products/Mixed Candy Party Cup.jpg"
+      ],
+      "stockLevel": 15,
+      "lowStockThreshold": 5,
+      "stockStatus": "instock",
+      "isFeatured": false,
+      "isNewArrival": false,
+      "status": "active",
+      "variants": []
+    },
+    {
+      "productId": "prod-36",
+      "name": "Heart Gummy Gift Box",
+      "slug": "heart-gummy-box",
+      "categoryId": "candy",
+      "subCategoryId": "candy-pick-mix",
+      "description": "Beautiful heart shaped gift box loaded with colorful, fruity gummy hearts.",
+      "basePrice": 1800,
+      "salePrice": 1500,
+      "weight": 300,
+      "images": [
+        "/images/products/Heart Gummy Gift Box.jpg"
+      ],
+      "stockLevel": 12,
+      "lowStockThreshold": 3,
+      "stockStatus": "instock",
+      "isFeatured": true,
+      "isNewArrival": false,
+      "status": "active",
+      "variants": []
+    },
+    {
+      "productId": "prod-37",
+      "name": "Valentine Special Chocolate Box",
+      "slug": "valentine-box",
+      "categoryId": "chocolate",
+      "subCategoryId": "chocolate-gift",
+      "description": "Heart shaped box filled with premium assorted chocolates and truffles.",
+      "basePrice": 4500,
+      "salePrice": 3900,
+      "weight": 350,
+      "images": [
+        "/images/products/Valentine Special Chocolate Box.jpg"
+      ],
+      "stockLevel": 8,
+      "lowStockThreshold": 3,
+      "stockStatus": "instock",
+      "isFeatured": true,
+      "isNewArrival": true,
+      "status": "active",
+      "variants": []
+    },
+    {
+      "productId": "prod-38",
+      "name": "Assorted Chocolate Box",
+      "slug": "chocolate-box",
+      "categoryId": "chocolate",
+      "subCategoryId": "chocolate-gift",
+      "description": "Gift box featuring a variety of milk, dark, and white chocolate pralines.",
+      "basePrice": 3200,
+      "salePrice": null,
+      "weight": 250,
+      "images": [
+        "/images/products/Assorted Chocolate Box.jpg"
+      ],
+      "stockLevel": 20,
+      "lowStockThreshold": 4,
+      "stockStatus": "instock",
+      "isFeatured": false,
+      "isNewArrival": false,
+      "status": "active",
+      "variants": []
+    },
+    {
+      "productId": "prod-39",
+      "name": "6-Pack Candy Collection",
+      "slug": "6-candy-pack",
+      "categoryId": "candy",
+      "subCategoryId": "candy-pick-mix",
+      "description": "A combination of 6 different viral and premium candy packs to try out.",
+      "basePrice": 2800,
+      "salePrice": 2400,
+      "weight": 600,
+      "images": [
+        "/images/products/6-Pack Candy Collection.jpg"
+      ],
+      "stockLevel": 15,
+      "lowStockThreshold": 3,
+      "stockStatus": "instock",
+      "isFeatured": true,
+      "isNewArrival": false,
+      "status": "active",
+      "variants": []
+    },
+    {
+      "productId": "prod-40",
+      "name": "Cadbury Dairy Milk Bouquet",
+      "slug": "dairy-milk-bouquet",
+      "categoryId": "chocolate",
+      "subCategoryId": "chocolate-gift",
+      "description": "Gift bouquet created with Cadbury Dairy Milk chocolate bars. Exquisitely packed.",
+      "basePrice": 3800,
+      "salePrice": null,
+      "weight": 400,
+      "images": [
+        "/images/products/Cadbury Dairy Milk Chocolate.jpg"
+      ],
+      "stockLevel": 10,
+      "lowStockThreshold": 3,
+      "stockStatus": "instock",
+      "isFeatured": true,
+      "isNewArrival": false,
+      "status": "active",
+      "variants": []
+    },
+    {
+      "productId": "prod-41",
+      "name": "Mixed Gummy Sharing Box",
+      "slug": "mix-gummy-box",
+      "categoryId": "candy",
+      "subCategoryId": "candy-pick-mix",
+      "description": "A large box packed with our complete catalog of gummy candies for sharing.",
+      "basePrice": 3500,
+      "salePrice": null,
+      "weight": 800,
+      "images": [
+        "/images/products/Mixed Gummy Sharing Box.jpg"
+      ],
+      "stockLevel": 12,
+      "lowStockThreshold": 3,
+      "stockStatus": "instock",
+      "isFeatured": false,
+      "isNewArrival": false,
+      "status": "active",
+      "variants": []
+    },
+    {
+      "productId": "prod-42",
+      "name": "Peel-Off Mango Gummy",
+      "slug": "peel-off-gummy",
+      "categoryId": "candy",
+      "subCategoryId": "candy-novelty",
+      "description": "Mango flavored peelable gummy candy. Peel off the outer layer to reveal a soft fruit core. Viral hit!",
+      "basePrice": 750,
+      "salePrice": 650,
+      "weight": 120,
+      "images": [
+        "/images/products/Peel-Off Mango Gummy.jpg"
+      ],
+      "stockLevel": 25,
+      "lowStockThreshold": 5,
+      "stockStatus": "instock",
+      "isFeatured": true,
+      "isNewArrival": true,
+      "status": "active",
+      "variants": []
+    },
+    {
+      "productId": "prod-43",
+      "name": "Haribo Mini Goldbears Pack",
+      "slug": "mini-haribo-gummies",
+      "categoryId": "candy",
+      "subCategoryId": "candy-gummy",
+      "description": "Individually wrapped mini packets of legendary Haribo Goldbears.",
+      "basePrice": 950,
+      "salePrice": null,
+      "weight": 220,
+      "images": [
+        "/images/products/Haribo Mini Goldbears Pack.jpg"
+      ],
+      "stockLevel": 30,
+      "lowStockThreshold": 5,
+      "stockStatus": "instock",
+      "isFeatured": false,
+      "isNewArrival": false,
+      "status": "active",
+      "variants": []
+    }
+  ],
+  "categories": [
+    {
+      "categoryId": "candy",
+      "name": "Candy",
+      "slug": "candy",
+      "parentId": null,
+      "displayOrder": 1,
+      "status": "active"
+    },
+    {
+      "categoryId": "chocolate",
+      "name": "Chocolate",
+      "slug": "chocolate",
+      "parentId": null,
+      "displayOrder": 2,
+      "status": "active"
+    },
+    {
+      "categoryId": "gourmet",
+      "name": "Gourmet",
+      "slug": "gourmet",
+      "parentId": null,
+      "displayOrder": 3,
+      "status": "active"
+    },
+    {
+      "categoryId": "candy-gummy",
+      "name": "Gummy & Jelly Candy",
+      "slug": "gummy-jelly",
+      "parentId": "candy",
+      "displayOrder": 1,
+      "status": "active"
+    },
+    {
+      "categoryId": "candy-lollipops",
+      "name": "Lollipops",
+      "slug": "lollipops",
+      "parentId": "candy",
+      "displayOrder": 2,
+      "status": "active"
+    },
+    {
+      "categoryId": "candy-sour",
+      "name": "Sour Candy",
+      "slug": "sour-candy",
+      "parentId": "candy",
+      "displayOrder": 3,
+      "status": "active"
+    },
+    {
+      "categoryId": "candy-hard",
+      "name": "Hard Candy",
+      "slug": "hard-candy",
+      "parentId": "candy",
+      "displayOrder": 4,
+      "status": "active"
+    },
+    {
+      "categoryId": "candy-bars",
+      "name": "Candy Bars",
+      "slug": "candy-bars",
+      "parentId": "candy",
+      "displayOrder": 5,
+      "status": "active"
+    },
+    {
+      "categoryId": "candy-novelty",
+      "name": "Novelty & Viral Candy",
+      "slug": "novelty-viral",
+      "parentId": "candy",
+      "displayOrder": 6,
+      "status": "active"
+    },
+    {
+      "categoryId": "candy-pick-mix",
+      "name": "Pick & Mix",
+      "slug": "pick-mix",
+      "parentId": "candy",
+      "displayOrder": 7,
+      "status": "active"
+    },
+    {
+      "categoryId": "chocolate-imported",
+      "name": "Imported Chocolate Bars",
+      "slug": "imported-bars",
+      "parentId": "chocolate",
+      "displayOrder": 1,
+      "status": "active"
+    },
+    {
+      "categoryId": "chocolate-pralines",
+      "name": "Pralines & Truffles",
+      "slug": "pralines-truffles",
+      "parentId": "chocolate",
+      "displayOrder": 2,
+      "status": "active"
+    },
+    {
+      "categoryId": "chocolate-gift",
+      "name": "Chocolate Gift Boxes",
+      "slug": "gift-boxes",
+      "parentId": "chocolate",
+      "displayOrder": 3,
+      "status": "active"
+    },
+    {
+      "categoryId": "chocolate-dark",
+      "name": "Dark Chocolate",
+      "slug": "dark-chocolate",
+      "parentId": "chocolate",
+      "displayOrder": 4,
+      "status": "active"
+    },
+    {
+      "categoryId": "chocolate-white-milk",
+      "name": "White & Milk Chocolate",
+      "slug": "white-milk-chocolate",
+      "parentId": "chocolate",
+      "displayOrder": 5,
+      "status": "active"
+    },
+    {
+      "categoryId": "chocolate-snacks",
+      "name": "Chocolate-Covered Snacks",
+      "slug": "chocolate-snacks",
+      "parentId": "chocolate",
+      "displayOrder": 6,
+      "status": "active"
+    },
+    {
+      "categoryId": "gourmet-snacks",
+      "name": "Imported Snacks & Crisps",
+      "slug": "snacks-crisps",
+      "parentId": "gourmet",
+      "displayOrder": 1,
+      "status": "active"
+    },
+    {
+      "categoryId": "gourmet-spreads",
+      "name": "Spreads & Condiments",
+      "slug": "spreads-condiments",
+      "parentId": "gourmet",
+      "displayOrder": 2,
+      "status": "active"
+    },
+    {
+      "categoryId": "gourmet-beverages",
+      "name": "Beverages & Drinks",
+      "slug": "beverages-drinks",
+      "parentId": "gourmet",
+      "displayOrder": 3,
+      "status": "active"
+    },
+    {
+      "categoryId": "gourmet-biscuits",
+      "name": "Biscuits & Cookies",
+      "slug": "biscuits-cookies",
+      "parentId": "gourmet",
+      "displayOrder": 4,
+      "status": "active"
+    },
+    {
+      "categoryId": "gourmet-hampers",
+      "name": "Gourmet Gift Hampers",
+      "slug": "gourmet-hampers",
+      "parentId": "gourmet",
+      "displayOrder": 5,
+      "status": "active"
+    }
+  ],
+  "orders": [],
+  "customers": [],
+  "adminUsers": [
+    {
+      "uid": "admin-owner",
+      "name": "Candy Owner",
+      "email": "owner@candyworld.lk",
+      "role": "Owner",
+      "isActive": true
+    },
+    {
+      "uid": "admin-staff",
+      "name": "Candy Staff",
+      "email": "staff@candyworld.lk",
+      "role": "Staff",
+      "isActive": true
+    }
+  ],
+  "messages": [],
+  "settings": {
+    "storeName": "Candy World",
+    "contactPhone": "+94 77 123 4567",
+    "contactEmail": "candyworld.lk23@gmail.com",
+    "storeAddress": "124, Hokandara Road, Thalawathugoda, Sri Lanka",
+    "metaPixelId": "FB-1234567890",
+    "tiktokPixelId": "TT-1234567890",
+    "emailjsServiceId": "service_wanl11i",
+    "emailjsTemplateId": "template_j03vo2h",
+    "emailjsVerifyTemplateId": "template_j03vo2h",
+    "emailjsPublicKey": "OyFOVHnKDcQ3-Iqs8",
+    "deliveryFeeColombo": 250,
+    "deliveryFeeOutstation": 450,
+    "freeDeliveryThreshold": 5000,
+    "weightExtraCharge": 50
+  }
+}

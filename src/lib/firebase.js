@@ -921,23 +921,43 @@ if (typeof window !== "undefined") {
   initializeDB();
 }
 
-const getMockData = (key, defaultVal) => {
+let mockDbCache = null;
+
+const getMockData = async (key, defaultVal) => {
   if (typeof window === "undefined") return defaultVal;
-  const val = localStorage.getItem(`candy_world_${key}`);
-  if (!val) {
-    localStorage.setItem(`candy_world_${key}`, JSON.stringify(defaultVal));
+  try {
+    const res = await fetch('/api/mockDb');
+    const db = await res.json();
+    mockDbCache = db;
+    if (db[key]) return db[key];
+    
+    // Auto-initialize with default if missing
+    await fetch('/api/mockDb', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key, data: defaultVal })
+    });
     return defaultVal;
+  } catch(e) {
+    // Fallback if API fails
+    const val = localStorage.getItem(`candy_world_${key}`);
+    return val ? JSON.parse(val) : defaultVal;
   }
-  return JSON.parse(val);
 };
 
-const saveMockData = (key, data) => {
-  if (typeof window !== "undefined") {
-    localStorage.setItem(`candy_world_${key}`, JSON.stringify(data));
-    // Notify same-tab components
+const saveMockData = async (key, data) => {
+  if (typeof window === "undefined") return;
+  try {
+    await fetch('/api/mockDb', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key, data })
+    });
     window.dispatchEvent(new CustomEvent("candy_catalog_updated", { detail: { key } }));
-    // Notify OTHER tabs via storage event (cross-tab sync)
     localStorage.setItem("candy_world_sync_signal", JSON.stringify({ key, ts: Date.now() }));
+  } catch(e) {
+    localStorage.setItem(`candy_world_${key}`, JSON.stringify(data));
+    window.dispatchEvent(new CustomEvent("candy_catalog_updated", { detail: { key } }));
   }
 };
 
@@ -973,53 +993,53 @@ export const getDBService = () => {
   return {
     // --- Products ---
     getProducts: async () => {
-      return getMockData("products", DEFAULT_PRODUCTS);
+      return await getMockData("products", DEFAULT_PRODUCTS);
     },
     getProductBySlug: async (slug) => {
-      const prods = getMockData("products", DEFAULT_PRODUCTS);
+      const prods = await getMockData("products", DEFAULT_PRODUCTS);
       return prods.find(p => p.slug === slug && p.status === "active") || null;
     },
     saveProduct: async (product) => {
-      const prods = getMockData("products", DEFAULT_PRODUCTS);
+      const prods = await getMockData("products", DEFAULT_PRODUCTS);
       const index = prods.findIndex(p => p.productId === product.productId);
       if (index > -1) {
         prods[index] = { ...prods[index], ...product, updatedAt: new Date() };
       } else {
         prods.push({ ...product, productId: `prod-${Date.now()}`, createdAt: new Date(), updatedAt: new Date() });
       }
-      saveMockData("products", prods);
+      await saveMockData("products", prods);
       return true;
     },
     deleteProduct: async (productId) => {
-      const prods = getMockData("products", DEFAULT_PRODUCTS);
+      const prods = await getMockData("products", DEFAULT_PRODUCTS);
       const updated = prods.filter(p => p.productId !== productId);
-      saveMockData("products", updated);
+      await saveMockData("products", updated);
       return true;
     },
 
     // --- Categories ---
     getCategories: async () => {
-      return getMockData("categories", DEFAULT_CATEGORIES);
+      return await getMockData("categories", DEFAULT_CATEGORIES);
     },
     saveCategory: async (category) => {
-      const cats = getMockData("categories", DEFAULT_CATEGORIES);
+      const cats = await getMockData("categories", DEFAULT_CATEGORIES);
       const index = cats.findIndex(c => c.categoryId === category.categoryId);
       if (index > -1) {
         cats[index] = { ...cats[index], ...category };
       } else {
         cats.push({ ...category, categoryId: `cat-${Date.now()}` });
       }
-      saveMockData("categories", cats);
+      await saveMockData("categories", cats);
       return true;
     },
 
     // --- Orders ---
     getOrders: async () => {
-      return getMockData("orders", []);
+      return await getMockData("orders", []);
     },
     createOrder: async (orderData) => {
-      const orders = getMockData("orders", []);
-      const products = getMockData("products", DEFAULT_PRODUCTS);
+      const orders = await getMockData("orders", []);
+      const products = await getMockData("products", DEFAULT_PRODUCTS);
 
       // Decrement stock for purchased items
       orderData.items.forEach(item => {
@@ -1050,7 +1070,7 @@ export const getDBService = () => {
         }
       });
 
-      saveMockData("products", products);
+      await saveMockData("products", products);
 
       const newOrder = {
         ...orderData,
@@ -1061,10 +1081,10 @@ export const getDBService = () => {
       };
 
       orders.push(newOrder);
-      saveMockData("orders", orders);
+      await saveMockData("orders", orders);
 
       // Save customer record or update count
-      const customers = getMockData("customers", []);
+      const customers = await getMockData("customers", []);
       const custIndex = customers.findIndex(c => c.phone === orderData.customerInfo.phone);
       if (custIndex > -1) {
         customers[custIndex].totalOrdersCount += 1;
@@ -1083,12 +1103,12 @@ export const getDBService = () => {
           lastOrderDate: new Date()
         });
       }
-      saveMockData("customers", customers);
+      await saveMockData("customers", customers);
 
       return newOrder;
     },
     updateOrderStatus: async (orderId, status, internalNote = "", riderInfo = "") => {
-      const orders = getMockData("orders", []);
+      const orders = await getMockData("orders", []);
       const index = orders.findIndex(o => o.orderId === orderId);
       if (index > -1) {
         const order = orders[index];
@@ -1104,7 +1124,7 @@ export const getDBService = () => {
 
         // If cancelled, restore stock
         if (status === "Cancelled" && oldStatus !== "Cancelled") {
-          const products = getMockData("products", DEFAULT_PRODUCTS);
+          const products = await getMockData("products", DEFAULT_PRODUCTS);
           order.items.forEach(item => {
             const prodIndex = products.findIndex(p => p.productId === item.productId);
             if (prodIndex > -1) {
@@ -1120,11 +1140,11 @@ export const getDBService = () => {
               product.stockStatus = "instock"; // simple restore
             }
           });
-          saveMockData("products", products);
+          await saveMockData("products", products);
         }
 
         orders[index] = order;
-        saveMockData("orders", orders);
+        await saveMockData("orders", orders);
         return true;
       }
       return false;
@@ -1132,7 +1152,7 @@ export const getDBService = () => {
 
     // --- Customers (Firebase Auth + Firestore when real Firebase, localStorage fallback) ---
     getCustomers: async () => {
-      return getMockData("customers", []);
+      return await getMockData("customers", []);
     },
     registerCustomer: async (customerData) => {
       if (isRealFirebase) {
@@ -1162,7 +1182,7 @@ export const getDBService = () => {
         return profileData;
       }
       // Demo fallback: localStorage
-      const customers = getMockData("customers", []);
+      const customers = await getMockData("customers", []);
       if (customers.find(c => c.email === customerData.email)) {
         throw new Error("Email already registered");
       }
@@ -1175,7 +1195,7 @@ export const getDBService = () => {
         createdAt: new Date(),
       };
       customers.push(newCustomer);
-      saveMockData("customers", customers);
+      await saveMockData("customers", customers);
       if (typeof window !== "undefined") {
         localStorage.setItem("candy_world_logged_customer", JSON.stringify(newCustomer));
       }
@@ -1202,7 +1222,7 @@ export const getDBService = () => {
         };
       }
       // Demo fallback: localStorage
-      const customers = getMockData("customers", []);
+      const customers = await getMockData("customers", []);
       const user = customers.find(c => c.email === email && c.password === password);
       if (user) {
         if (typeof window !== "undefined") {
@@ -1255,12 +1275,12 @@ export const getDBService = () => {
         return updated;
       }
       // Demo fallback
-      const customers = getMockData("customers", []);
+      const customers = await getMockData("customers", []);
       const index = customers.findIndex(c => c.email === email);
       if (index > -1) {
         const updatedUser = { ...customers[index], ...updatedFields };
         customers[index] = updatedUser;
-        saveMockData("customers", customers);
+        await saveMockData("customers", customers);
         if (typeof window !== "undefined") {
           localStorage.setItem("candy_world_logged_customer", JSON.stringify(updatedUser));
         }
@@ -1299,15 +1319,15 @@ export const getDBService = () => {
 
     // --- Promotions ---
     getPromotions: async () => {
-      return getMockData("promotions", DEFAULT_PROMOTIONS);
+      return await getMockData("promotions", DEFAULT_PROMOTIONS);
     },
 
     // --- Messages / Enquiries ---
     getMessages: async () => {
-      return getMockData("messages", []);
+      return await getMockData("messages", []);
     },
     saveMessage: async (msg) => {
-      const messages = getMockData("messages", []);
+      const messages = await getMockData("messages", []);
       const index = messages.findIndex(m => m.id === msg.id);
       const newMsg = {
         id: msg.id || `msg-${Date.now()}`,
@@ -1324,33 +1344,33 @@ export const getDBService = () => {
       } else {
         messages.push(newMsg);
       }
-      saveMockData("messages", messages);
+      await saveMockData("messages", messages);
       return newMsg;
     },
     deleteMessage: async (id) => {
-      const messages = getMockData("messages", []);
+      const messages = await getMockData("messages", []);
       const updated = messages.filter(m => m.id !== id);
-      saveMockData("messages", updated);
+      await saveMockData("messages", updated);
       return true;
     },
 
     // --- System Settings ---
     getSettings: async () => {
-      return getMockData("settings", DEFAULT_SETTINGS);
+      return await getMockData("settings", DEFAULT_SETTINGS);
     },
     saveSettings: async (settings) => {
-      const current = getMockData("settings", DEFAULT_SETTINGS);
+      const current = await getMockData("settings", DEFAULT_SETTINGS);
       const updated = { ...current, ...settings };
-      saveMockData("settings", updated);
+      await saveMockData("settings", updated);
       return updated;
     },
 
     // --- Admin Users & Auth Simulation ---
     getAdminUsers: async () => {
-      return getMockData("adminUsers", DEFAULT_ADMIN_USERS);
+      return await getMockData("adminUsers", DEFAULT_ADMIN_USERS);
     },
     loginAdmin: async (email, password) => {
-      const admins = getMockData("adminUsers", DEFAULT_ADMIN_USERS);
+      const admins = await getMockData("adminUsers", DEFAULT_ADMIN_USERS);
       const user = admins.find(a => a.email === email);
       if (user && password === "admin123") { // default password for testing
         if (typeof window !== "undefined") {
@@ -1373,10 +1393,10 @@ export const getDBService = () => {
 
     // --- Site Settings ---
     getSettings: async () => {
-      return getMockData("settings", DEFAULT_SETTINGS);
+      return await getMockData("settings", DEFAULT_SETTINGS);
     },
     saveSettings: async (settings) => {
-      saveMockData("settings", settings);
+      await saveMockData("settings", settings);
       return true;
     },
   };
