@@ -1150,7 +1150,43 @@
       "updatedAt": "2026-07-07T09:02:08.429Z"
     }
   ],
-  "customers": [],
+  "customers": [
+    {
+      "customerId": "cust-1783335158440",
+      "name": "sampath",
+      "phone": "0701442569",
+      "email": "wenuris2004@gmail.com",
+      "addresses": [
+        "budupilimaya asala, kadahapola, horombawa"
+      ],
+      "district": "Kegalle",
+      "totalOrdersCount": 3,
+      "lifetimeValue": 12750,
+      "lastOrderDate": "2026-07-06T17:10:23.688Z"
+    },
+    {
+      "name": "wenuri sanjana",
+      "email": "s23010422@ousl.lk",
+      "phone": "0701442565",
+      "password": "123456",
+      "customerId": "cust-1783340409595",
+      "addresses": [],
+      "totalOrdersCount": 0,
+      "lifetimeValue": 0,
+      "createdAt": "2026-07-06T12:20:09.595Z"
+    },
+    {
+      "name": "wenuri",
+      "email": "wenuriherath04@gmail.com",
+      "phone": "0701442569",
+      "password": "123456",
+      "customerId": "cust-1784126391061",
+      "addresses": [],
+      "totalOrdersCount": 0,
+      "lifetimeValue": 0,
+      "createdAt": "2026-07-15T14:39:51.061Z"
+    }
+  ],
   "adminUsers": [
     {
       "uid": "admin-owner",
@@ -1167,7 +1203,18 @@
       "isActive": true
     }
   ],
-  "messages": [],
+  "messages": [
+    {
+      "id": "msg-1783414655646",
+      "name": "H.M.Wenuri Sanjana Herath",
+      "email": "wenuris2004@gmail.com",
+      "phone": "+94701442569",
+      "subject": "General Enquiry",
+      "message": "test",
+      "status": "read",
+      "createdAt": "2026-07-07T08:57:35.646Z"
+    }
+  ],
   "settings": {
     "storeName": "Candy World",
     "contactPhone": "+94 77 123 4567",
