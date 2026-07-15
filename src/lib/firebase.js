@@ -1293,8 +1293,8 @@ export const getDBService = () => {
           }
         });
       }
-      // Demo fallback: no real-time subscription needed
-      return () => {};
+      // Demo fallback: no real-time subscription needed, return null to signal fallback to AuthContext
+      return null;
     },
 
     // --- Promotions ---
