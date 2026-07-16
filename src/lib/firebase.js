@@ -1321,6 +1321,23 @@ export const getDBService = () => {
       }
       throw new Error("User not found");
     },
+    resetCustomerPassword: async (email) => {
+      if (isRealFirebase) {
+        // Firebase has built-in sendPasswordResetEmail
+        const { sendPasswordResetEmail: fbSendReset } = await import("firebase/auth");
+        const firebaseAuth = getAuth();
+        await fbSendReset(firebaseAuth, email);
+        return { sent: true };
+      }
+      // Demo fallback: generate temp password and update in DB
+      const customers = await getMockData("customers", []);
+      const customer = customers.find(c => c.email === email);
+      if (!customer) throw new Error("No account found with this email address.");
+      const tempPassword = Math.random().toString(36).slice(-8).toUpperCase();
+      customer.password = tempPassword;
+      await saveMockData("customers", customers);
+      return { sent: true, customer, tempPassword };
+    },
     // Export onAuthStateChanged for AuthContext to use
     onAuthStateChanged: (callback) => {
       if (isRealFirebase) {
