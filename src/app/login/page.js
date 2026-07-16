@@ -64,18 +64,21 @@ function ForgotPasswordModal({ onClose }) {
     setLoading(true);
     try {
       // Fetch all customers, update the matching one, save back
-      const res = await fetch('/api/mockDb', { cache: 'no-store' });
-      const db = await res.json();
+      const getRes = await fetch('/api/mockDb', { cache: 'no-store' });
+      if (!getRes.ok) throw new Error("Could not connect to the database. Make sure the dev server is running.");
+      const db = await getRes.json();
       const customers = db.customers || [];
       const normalizedEmail = email.trim().toLowerCase();
       const idx = customers.findIndex(c => c.email?.toLowerCase() === normalizedEmail);
       if (idx === -1) throw new Error("Account not found. Please try again.");
       customers[idx] = { ...customers[idx], password: newPassword };
-      await fetch('/api/mockDb', {
+      const saveRes = await fetch('/api/mockDb', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ key: 'customers', data: customers })
       });
+      const saveResult = await saveRes.json();
+      if (!saveResult.success) throw new Error("Failed to save password. Please try again.");
       setStep("done");
     } catch (err) {
       setError(err.message || "Failed to update password. Please try again.");

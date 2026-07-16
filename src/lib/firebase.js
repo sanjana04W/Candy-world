@@ -1238,9 +1238,25 @@ export const getDBService = () => {
           uid,
         };
       }
-      // Demo fallback: check central mock DB
-      const customers = await getMockData("customers", []);
-      const user = customers.find(c => c.email === email && c.password === password);
+      // Demo fallback: check central mock DB (fetch directly for freshest data)
+      let customers = [];
+      try {
+        const res = await fetch('/api/mockDb', { cache: 'no-store' });
+        const db = await res.json();
+        customers = db.customers || [];
+      } catch(e) {
+        customers = await getMockData("customers", []);
+      }
+      const normalEmail = email.trim().toLowerCase();
+      // Case-insensitive email match
+      const matchedByEmail = customers.find(c => c.email?.toLowerCase() === normalEmail);
+      if (!matchedByEmail) {
+        throw new Error("Invalid email or password");
+      }
+      if (!matchedByEmail.password) {
+        throw new Error("This account has no password set. Please use 'Forgot Password' to create one.");
+      }
+      const user = matchedByEmail.password === password ? matchedByEmail : null;
       if (user) {
         // Save session cookie via API for cross-device persistence
         try {
