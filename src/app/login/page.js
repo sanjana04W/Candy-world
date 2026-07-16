@@ -28,7 +28,7 @@ function ForgotPasswordModal({ onClose }) {
     try {
       const dbService = getDBService();
       const customers = await dbService.getCustomers();
-      const found = customers.find(c => c.email === email && c.password !== undefined);
+      const found = customers.find(c => c.email === email);
       if (!found) throw new Error("No account found with this email address.");
       setFoundCustomer(found);
       setStep("newpass");
