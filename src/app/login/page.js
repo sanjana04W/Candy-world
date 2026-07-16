@@ -26,9 +26,19 @@ function ForgotPasswordModal({ onClose }) {
     setError("");
     setLoading(true);
     try {
-      const dbService = getDBService();
-      const customers = await dbService.getCustomers();
-      const found = customers.find(c => c.email === email);
+      // Directly fetch from central API for most up-to-date data
+      let customers = [];
+      try {
+        const res = await fetch('/api/mockDb', { cache: 'no-store' });
+        const db = await res.json();
+        customers = db.customers || [];
+      } catch {
+        // Fallback via dbService if direct fetch fails
+        const dbService = getDBService();
+        customers = await dbService.getCustomers();
+      }
+      const found = customers.find(c => c.email === email.trim().toLowerCase()) ||
+                    customers.find(c => c.email?.toLowerCase() === email.trim().toLowerCase());
       if (!found) throw new Error("No account found with this email address.");
       setFoundCustomer(found);
       setStep("newpass");
@@ -53,8 +63,19 @@ function ForgotPasswordModal({ onClose }) {
     }
     setLoading(true);
     try {
-      const dbService = getDBService();
-      await dbService.updateCustomer(email, { password: newPassword });
+      // Fetch all customers, update the matching one, save back
+      const res = await fetch('/api/mockDb', { cache: 'no-store' });
+      const db = await res.json();
+      const customers = db.customers || [];
+      const normalizedEmail = email.trim().toLowerCase();
+      const idx = customers.findIndex(c => c.email?.toLowerCase() === normalizedEmail);
+      if (idx === -1) throw new Error("Account not found. Please try again.");
+      customers[idx] = { ...customers[idx], password: newPassword };
+      await fetch('/api/mockDb', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'customers', data: customers })
+      });
       setStep("done");
     } catch (err) {
       setError(err.message || "Failed to update password. Please try again.");
