@@ -926,7 +926,7 @@ let mockDbCache = null;
 const getMockData = async (key, defaultVal) => {
   if (typeof window === "undefined") return defaultVal;
   try {
-    const res = await fetch('/api/mockDb');
+    const res = await fetch('/api/mockDb', { cache: 'no-store' });
     const db = await res.json();
     mockDbCache = db;
     
@@ -1238,10 +1238,19 @@ export const getDBService = () => {
           uid,
         };
       }
-      // Demo fallback: localStorage
+      // Demo fallback: check central mock DB
       const customers = await getMockData("customers", []);
       const user = customers.find(c => c.email === email && c.password === password);
       if (user) {
+        // Save session cookie via API for cross-device persistence
+        try {
+          await fetch('/api/mockDb', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'saveSession', user })
+          });
+        } catch(e) { /* fallback */ }
+        // Also save to localStorage for same-device restore
         if (typeof window !== "undefined") {
           localStorage.setItem("candy_world_logged_customer", JSON.stringify(user));
         }
@@ -1258,7 +1267,7 @@ export const getDBService = () => {
         const cached = localStorage.getItem("candy_world_fb_customer");
         return cached ? JSON.parse(cached) : null;
       }
-      // Demo fallback
+      // Demo fallback: check localStorage for session
       if (typeof window === "undefined") return null;
       const user = localStorage.getItem("candy_world_logged_customer");
       return user ? JSON.parse(user) : null;
@@ -1272,7 +1281,14 @@ export const getDBService = () => {
         }
         return;
       }
-      // Demo fallback
+      // Demo fallback: clear session
+      try {
+        await fetch('/api/mockDb', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'clearSession' })
+        });
+      } catch(e) { /* ignore */ }
       if (typeof window !== "undefined") {
         localStorage.removeItem("candy_world_logged_customer");
       }
@@ -1330,7 +1346,43 @@ export const getDBService = () => {
           }
         });
       }
-      // Demo fallback: no real-time subscription needed, return null to signal fallback to AuthContext
+      // Demo fallback: no real-time subscription, but asynchronously check session from cookie via API
+      setTimeout(async () => {
+        try {
+          // Check localStorage first (fast path for same device)
+          if (typeof window !== "undefined") {
+            const sessionStr = localStorage.getItem("candy_world_logged_customer");
+            if (sessionStr) {
+              const sessionUser = JSON.parse(sessionStr);
+              const customers = await getMockData("customers", []);
+              const found = customers.find(c => c.email === sessionUser.email && c.password === sessionUser.password);
+              if (found) { callback(found); return; }
+              localStorage.removeItem("candy_world_logged_customer");
+            }
+          }
+          // Check session cookie via document.cookie (cross-device path)
+          if (typeof document !== "undefined") {
+            const cookieVal = document.cookie
+              .split('; ')
+              .find(row => row.startsWith('candy_world_session='));
+            if (cookieVal) {
+              try {
+                const sessionUser = JSON.parse(decodeURIComponent(cookieVal.split('=').slice(1).join('=')));
+                const customers = await getMockData("customers", []);
+                const found = customers.find(c => c.email === sessionUser.email && c.password === sessionUser.password);
+                if (found) {
+                  if (typeof window !== "undefined") {
+                    localStorage.setItem("candy_world_logged_customer", JSON.stringify(found));
+                  }
+                  callback(found);
+                  return;
+                }
+              } catch(e) { /* bad cookie */ }
+            }
+          }
+        } catch(e) { /* ignore */ }
+        callback(null);
+      }, 0);
       return null;
     },
 

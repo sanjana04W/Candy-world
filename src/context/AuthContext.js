@@ -19,12 +19,10 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     });
 
-    // Fallback: if no Firebase, check localStorage immediately
-    if (!unsubscribe || typeof unsubscribe !== "function") {
-      const currentUser = dbService.getCurrentCustomer();
-      if (currentUser) setUser(currentUser);
-      setLoading(false);
-    }
+    // Fallback: onAuthStateChanged returns null in demo mode
+    // In demo mode the callback above fires asynchronously via setTimeout,
+    // so we do NOT need a second localStorage check here - it would cause a race condition.
+    // The async callback will call setLoading(false) on its own.
 
     return () => {
       if (typeof unsubscribe === "function") unsubscribe();
