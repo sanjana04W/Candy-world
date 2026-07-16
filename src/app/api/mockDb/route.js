@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
-import { cookies } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -10,7 +9,7 @@ const dbPath = path.join(process.cwd(), 'mock-db.json');
 const SESSION_COOKIE = 'candy_world_session';
 
 // Read DB
-export async function GET(req) {
+export async function GET() {
   try {
     if (!fs.existsSync(dbPath)) {
       fs.writeFileSync(dbPath, JSON.stringify({}));
@@ -27,7 +26,7 @@ export async function POST(req) {
   try {
     const body = await req.json();
 
-    // Handle session save/get specially
+    // Handle session save specially (set cookie on response)
     if (body.action === 'saveSession') {
       const res = NextResponse.json({ success: true });
       res.cookies.set(SESSION_COOKIE, JSON.stringify(body.user), {
@@ -45,7 +44,11 @@ export async function POST(req) {
       return res;
     }
 
+    // Normal DB write
     const { key, data } = body;
+    if (!key) {
+      return NextResponse.json({ success: false, error: 'Missing key' });
+    }
     let db = {};
     if (fs.existsSync(dbPath)) {
       db = JSON.parse(fs.readFileSync(dbPath, 'utf8'));
@@ -54,6 +57,7 @@ export async function POST(req) {
     fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
     return NextResponse.json({ success: true });
   } catch (e) {
+    console.error('[mockDb API error]', e.message);
     return NextResponse.json({ success: false, error: e.message });
   }
 }
