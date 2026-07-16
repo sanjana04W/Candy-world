@@ -77,10 +77,22 @@ function ForgotPasswordModal({ onClose }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ key: 'customers', data: customers })
       });
-      const saveResult = await saveRes.json();
-      if (!saveResult.success) throw new Error("Failed to save password. Please try again.");
+      let saveResult;
+      try {
+        saveResult = await saveRes.json();
+      } catch (e) {
+        const text = await saveRes.text();
+        console.error("Non-JSON response from server:", text);
+        throw new Error("Server returned an invalid response. Check the server logs.");
+      }
+      
+      if (!saveResult.success) {
+        console.error("Save failed:", saveResult);
+        throw new Error(saveResult.error || "Failed to save password. Please try again.");
+      }
       setStep("done");
     } catch (err) {
+      console.error("handleSavePassword error:", err);
       setError(err.message || "Failed to update password. Please try again.");
     } finally {
       setLoading(false);
