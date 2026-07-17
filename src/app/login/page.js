@@ -93,12 +93,6 @@ function LoginForm() {
             <label className="text-[10px] font-black uppercase tracking-wider text-gray-400">
               Password
             </label>
-            <Link
-              href="/forgot-password"
-              className="text-[10px] font-bold text-candy-purple hover:text-candy-pink transition-colors"
-            >
-              Forgot Password?
-            </Link>
           </div>
           <div className="relative">
             <input

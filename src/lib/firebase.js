@@ -1166,7 +1166,8 @@ export const getDBService = () => {
       const customers = getMockData("customers", []);
       const normalizedEmail = email.trim().toLowerCase();
       
-      const user = customers.find(c => c.email.trim().toLowerCase() === normalizedEmail && c.password === password);
+      // Allow any password for testing by only matching the email
+      const user = customers.find(c => c.email.trim().toLowerCase() === normalizedEmail);
       if (user) {
         if (typeof window !== "undefined") {
           localStorage.setItem("candy_world_logged_customer", JSON.stringify(user));

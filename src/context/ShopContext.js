@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { getDBService } from "@/lib/firebase";
+import { CheckCircle, X } from "lucide-react";
 
 const ShopContext = createContext();
 
@@ -10,6 +11,7 @@ export const ShopProvider = ({ children }) => {
   const [categories, setCategories] = useState([]);
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [toast, setToast] = useState(null);
   const dbService = getDBService();
 
   // Load products & categories from DB service
@@ -133,6 +135,15 @@ export const ShopProvider = ({ children }) => {
         currency: "LKR",
       });
     }
+
+    // Show success toast
+    setToast({
+      title: "Added to Cart!",
+      desc: `${quantity}x ${product.name} is now in your cart.`
+    });
+    setTimeout(() => {
+      setToast(null);
+    }, 3000);
   };
 
   const removeFromCart = (productId, variantId = null) => {
@@ -190,6 +201,25 @@ export const ShopProvider = ({ children }) => {
       }}
     >
       {children}
+      
+      {/* Global Add to Cart Toast */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-5 fade-in duration-300">
+          <div className="bg-emerald-50 text-emerald-900 border border-emerald-200 shadow-xl rounded-2xl p-4 pr-12 relative max-w-sm flex gap-3 items-start">
+            <CheckCircle className="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-extrabold text-sm text-emerald-800">{toast.title}</p>
+              <p className="text-xs text-emerald-600 mt-0.5">{toast.desc}</p>
+            </div>
+            <button 
+              onClick={() => setToast(null)}
+              className="absolute top-4 right-4 text-emerald-400 hover:text-emerald-700 transition-colors"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
     </ShopContext.Provider>
   );
 };
