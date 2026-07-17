@@ -1,5 +1,6 @@
 {
   "customers": [],
+  "orders": [],
   "products": [
     {
       "productId": "prod-1",
