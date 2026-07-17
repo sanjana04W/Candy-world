@@ -1136,12 +1136,16 @@ export const getDBService = () => {
     },
     registerCustomer: async (customerData) => {
       const customers = getMockData("customers", []);
+      // Normalize email to prevent mobile autocorrect/trailing space issues
+      const normalizedEmail = customerData.email.trim().toLowerCase();
+
       // Check if email already exists
-      if (customers.find(c => c.email === customerData.email)) {
+      if (customers.find(c => c.email.trim().toLowerCase() === normalizedEmail)) {
         throw new Error("Email already registered");
       }
       const newCustomer = {
         ...customerData,
+        email: normalizedEmail,
         customerId: `cust-${Date.now()}`,
         addresses: [],
         totalOrdersCount: 0,
@@ -1160,7 +1164,9 @@ export const getDBService = () => {
     },
     loginCustomer: async (email, password) => {
       const customers = getMockData("customers", []);
-      const user = customers.find(c => c.email === email && c.password === password);
+      const normalizedEmail = email.trim().toLowerCase();
+      
+      const user = customers.find(c => c.email.trim().toLowerCase() === normalizedEmail && c.password === password);
       if (user) {
         if (typeof window !== "undefined") {
           localStorage.setItem("candy_world_logged_customer", JSON.stringify(user));
