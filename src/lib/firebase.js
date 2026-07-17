@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getFirestore, doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile as fbUpdateProfile } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage";
 
 // Default configuration with placeholder values.
@@ -921,60 +921,23 @@ if (typeof window !== "undefined") {
   initializeDB();
 }
 
-let mockDbCache = null;
-
-const getMockData = async (key, defaultVal) => {
+const getMockData = (key, defaultVal) => {
   if (typeof window === "undefined") return defaultVal;
-  try {
-    const res = await fetch('/api/mockDb', { cache: 'no-store' });
-    const db = await res.json();
-    mockDbCache = db;
-    
-    // Auto-migrate from localStorage if server has empty array and local has data
-    if (db[key] && Array.isArray(db[key]) && db[key].length === 0) {
-      const local = localStorage.getItem(`candy_world_${key}`);
-      if (local) {
-        const parsedLocal = JSON.parse(local);
-        if (Array.isArray(parsedLocal) && parsedLocal.length > 0) {
-          await fetch('/api/mockDb', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ key, data: parsedLocal })
-          });
-          return parsedLocal;
-        }
-      }
-    }
-
-    if (db[key]) return db[key];
-    
-    // Auto-initialize with default if missing
-    await fetch('/api/mockDb', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key, data: defaultVal })
-    });
+  const val = localStorage.getItem(`candy_world_${key}`);
+  if (!val) {
+    localStorage.setItem(`candy_world_${key}`, JSON.stringify(defaultVal));
     return defaultVal;
-  } catch(e) {
-    // Fallback if API fails
-    const val = localStorage.getItem(`candy_world_${key}`);
-    return val ? JSON.parse(val) : defaultVal;
   }
+  return JSON.parse(val);
 };
 
-const saveMockData = async (key, data) => {
-  if (typeof window === "undefined") return;
-  try {
-    await fetch('/api/mockDb', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key, data })
-    });
-    window.dispatchEvent(new CustomEvent("candy_catalog_updated", { detail: { key } }));
-    localStorage.setItem("candy_world_sync_signal", JSON.stringify({ key, ts: Date.now() }));
-  } catch(e) {
+const saveMockData = (key, data) => {
+  if (typeof window !== "undefined") {
     localStorage.setItem(`candy_world_${key}`, JSON.stringify(data));
+    // Notify same-tab components
     window.dispatchEvent(new CustomEvent("candy_catalog_updated", { detail: { key } }));
+    // Notify OTHER tabs via storage event (cross-tab sync)
+    localStorage.setItem("candy_world_sync_signal", JSON.stringify({ key, ts: Date.now() }));
   }
 };
 
@@ -1010,53 +973,53 @@ export const getDBService = () => {
   return {
     // --- Products ---
     getProducts: async () => {
-      return await getMockData("products", DEFAULT_PRODUCTS);
+      return getMockData("products", DEFAULT_PRODUCTS);
     },
     getProductBySlug: async (slug) => {
-      const prods = await getMockData("products", DEFAULT_PRODUCTS);
+      const prods = getMockData("products", DEFAULT_PRODUCTS);
       return prods.find(p => p.slug === slug && p.status === "active") || null;
     },
     saveProduct: async (product) => {
-      const prods = await getMockData("products", DEFAULT_PRODUCTS);
+      const prods = getMockData("products", DEFAULT_PRODUCTS);
       const index = prods.findIndex(p => p.productId === product.productId);
       if (index > -1) {
         prods[index] = { ...prods[index], ...product, updatedAt: new Date() };
       } else {
         prods.push({ ...product, productId: `prod-${Date.now()}`, createdAt: new Date(), updatedAt: new Date() });
       }
-      await saveMockData("products", prods);
+      saveMockData("products", prods);
       return true;
     },
     deleteProduct: async (productId) => {
-      const prods = await getMockData("products", DEFAULT_PRODUCTS);
+      const prods = getMockData("products", DEFAULT_PRODUCTS);
       const updated = prods.filter(p => p.productId !== productId);
-      await saveMockData("products", updated);
+      saveMockData("products", updated);
       return true;
     },
 
     // --- Categories ---
     getCategories: async () => {
-      return await getMockData("categories", DEFAULT_CATEGORIES);
+      return getMockData("categories", DEFAULT_CATEGORIES);
     },
     saveCategory: async (category) => {
-      const cats = await getMockData("categories", DEFAULT_CATEGORIES);
+      const cats = getMockData("categories", DEFAULT_CATEGORIES);
       const index = cats.findIndex(c => c.categoryId === category.categoryId);
       if (index > -1) {
         cats[index] = { ...cats[index], ...category };
       } else {
         cats.push({ ...category, categoryId: `cat-${Date.now()}` });
       }
-      await saveMockData("categories", cats);
+      saveMockData("categories", cats);
       return true;
     },
 
     // --- Orders ---
     getOrders: async () => {
-      return await getMockData("orders", []);
+      return getMockData("orders", []);
     },
     createOrder: async (orderData) => {
-      const orders = await getMockData("orders", []);
-      const products = await getMockData("products", DEFAULT_PRODUCTS);
+      const orders = getMockData("orders", []);
+      const products = getMockData("products", DEFAULT_PRODUCTS);
 
       // Decrement stock for purchased items
       orderData.items.forEach(item => {
@@ -1087,7 +1050,7 @@ export const getDBService = () => {
         }
       });
 
-      await saveMockData("products", products);
+      saveMockData("products", products);
 
       const newOrder = {
         ...orderData,
@@ -1098,10 +1061,10 @@ export const getDBService = () => {
       };
 
       orders.push(newOrder);
-      await saveMockData("orders", orders);
+      saveMockData("orders", orders);
 
       // Save customer record or update count
-      const customers = await getMockData("customers", []);
+      const customers = getMockData("customers", []);
       const custIndex = customers.findIndex(c => c.phone === orderData.customerInfo.phone);
       if (custIndex > -1) {
         customers[custIndex].totalOrdersCount += 1;
@@ -1120,12 +1083,12 @@ export const getDBService = () => {
           lastOrderDate: new Date()
         });
       }
-      await saveMockData("customers", customers);
+      saveMockData("customers", customers);
 
       return newOrder;
     },
     updateOrderStatus: async (orderId, status, internalNote = "", riderInfo = "") => {
-      const orders = await getMockData("orders", []);
+      const orders = getMockData("orders", []);
       const index = orders.findIndex(o => o.orderId === orderId);
       if (index > -1) {
         const order = orders[index];
@@ -1141,7 +1104,7 @@ export const getDBService = () => {
 
         // If cancelled, restore stock
         if (status === "Cancelled" && oldStatus !== "Cancelled") {
-          const products = await getMockData("products", DEFAULT_PRODUCTS);
+          const products = getMockData("products", DEFAULT_PRODUCTS);
           order.items.forEach(item => {
             const prodIndex = products.findIndex(p => p.productId === item.productId);
             if (prodIndex > -1) {
@@ -1157,49 +1120,23 @@ export const getDBService = () => {
               product.stockStatus = "instock"; // simple restore
             }
           });
-          await saveMockData("products", products);
+          saveMockData("products", products);
         }
 
         orders[index] = order;
-        await saveMockData("orders", orders);
+        saveMockData("orders", orders);
         return true;
       }
       return false;
     },
 
-    // --- Customers (Firebase Auth + Firestore when real Firebase, localStorage fallback) ---
+    // --- Customers ---
     getCustomers: async () => {
-      return await getMockData("customers", []);
+      return getMockData("customers", []);
     },
     registerCustomer: async (customerData) => {
-      if (isRealFirebase) {
-        // Real Firebase: create user in Firebase Auth + store profile in Firestore
-        const firebaseAuth = getAuth();
-        const firestore = getFirestore();
-        const credential = await createUserWithEmailAndPassword(
-          firebaseAuth,
-          customerData.email,
-          customerData.password
-        );
-        const uid = credential.user.uid;
-        // Update display name
-        await fbUpdateProfile(credential.user, { displayName: customerData.name });
-        // Store extra profile fields in Firestore
-        const profileData = {
-          customerId: uid,
-          name: customerData.name,
-          email: customerData.email,
-          phone: customerData.phone || "",
-          addresses: [],
-          totalOrdersCount: 0,
-          lifetimeValue: 0,
-          createdAt: new Date().toISOString(),
-        };
-        await setDoc(doc(firestore, "customers", uid), profileData);
-        return profileData;
-      }
-      // Demo fallback: localStorage
-      const customers = await getMockData("customers", []);
+      const customers = getMockData("customers", []);
+      // Check if email already exists
       if (customers.find(c => c.email === customerData.email)) {
         throw new Error("Email already registered");
       }
@@ -1210,63 +1147,21 @@ export const getDBService = () => {
         totalOrdersCount: 0,
         lifetimeValue: 0,
         createdAt: new Date(),
+        // Mocking a password hash by storing plain text for local demo
       };
       customers.push(newCustomer);
-      await saveMockData("customers", customers);
+      saveMockData("customers", customers);
+      
+      // Auto-login
       if (typeof window !== "undefined") {
         localStorage.setItem("candy_world_logged_customer", JSON.stringify(newCustomer));
       }
       return newCustomer;
     },
     loginCustomer: async (email, password) => {
-      if (isRealFirebase) {
-        // Real Firebase: sign in via Firebase Auth
-        const firebaseAuth = getAuth();
-        const firestore = getFirestore();
-        const credential = await signInWithEmailAndPassword(firebaseAuth, email, password);
-        const uid = credential.user.uid;
-        // Fetch full profile from Firestore
-        const profileSnap = await getDoc(doc(firestore, "customers", uid));
-        if (profileSnap.exists()) {
-          return { ...profileSnap.data(), uid };
-        }
-        // Profile doesn't exist yet (e.g. old user), return basic info
-        return {
-          customerId: uid,
-          name: credential.user.displayName || email,
-          email: credential.user.email,
-          uid,
-        };
-      }
-      // Demo fallback: check central mock DB (fetch directly for freshest data)
-      let customers = [];
-      try {
-        const res = await fetch('/api/mockDb', { cache: 'no-store' });
-        const db = await res.json();
-        customers = db.customers || [];
-      } catch(e) {
-        customers = await getMockData("customers", []);
-      }
-      const normalEmail = email.trim().toLowerCase();
-      // Case-insensitive email match
-      const matchedByEmail = customers.find(c => c.email?.toLowerCase() === normalEmail);
-      if (!matchedByEmail) {
-        throw new Error("Invalid email or password");
-      }
-      if (!matchedByEmail.password) {
-        throw new Error("This account has no password set. Please use 'Forgot Password' to create one.");
-      }
-      const user = matchedByEmail.password === password ? matchedByEmail : null;
+      const customers = getMockData("customers", []);
+      const user = customers.find(c => c.email === email && c.password === password);
       if (user) {
-        // Save session cookie via API for cross-device persistence
-        try {
-          await fetch('/api/mockDb', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'saveSession', user })
-          });
-        } catch(e) { /* fallback */ }
-        // Also save to localStorage for same-device restore
         if (typeof window !== "undefined") {
           localStorage.setItem("candy_world_logged_customer", JSON.stringify(user));
         }
@@ -1275,61 +1170,22 @@ export const getDBService = () => {
       throw new Error("Invalid email or password");
     },
     getCurrentCustomer: () => {
-      if (isRealFirebase) {
-        // In real Firebase mode, session is managed by Firebase Auth.
-        // The AuthContext subscribes to onAuthStateChanged for persistence.
-        // This sync method only checks localStorage cache set by AuthContext.
-        if (typeof window === "undefined") return null;
-        const cached = localStorage.getItem("candy_world_fb_customer");
-        return cached ? JSON.parse(cached) : null;
-      }
-      // Demo fallback: check localStorage for session
       if (typeof window === "undefined") return null;
       const user = localStorage.getItem("candy_world_logged_customer");
       return user ? JSON.parse(user) : null;
     },
-    logoutCustomer: async () => {
-      if (isRealFirebase) {
-        const firebaseAuth = getAuth();
-        await signOut(firebaseAuth);
-        if (typeof window !== "undefined") {
-          localStorage.removeItem("candy_world_fb_customer");
-        }
-        return;
-      }
-      // Demo fallback: clear session
-      try {
-        await fetch('/api/mockDb', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'clearSession' })
-        });
-      } catch(e) { /* ignore */ }
+    logoutCustomer: () => {
       if (typeof window !== "undefined") {
         localStorage.removeItem("candy_world_logged_customer");
       }
     },
     updateCustomer: async (email, updatedFields) => {
-      if (isRealFirebase) {
-        const firebaseAuth = getAuth();
-        const firestore = getFirestore();
-        const uid = firebaseAuth.currentUser?.uid;
-        if (!uid) throw new Error("Not logged in");
-        await updateDoc(doc(firestore, "customers", uid), updatedFields);
-        const snap = await getDoc(doc(firestore, "customers", uid));
-        const updated = snap.data();
-        if (typeof window !== "undefined") {
-          localStorage.setItem("candy_world_fb_customer", JSON.stringify(updated));
-        }
-        return updated;
-      }
-      // Demo fallback
-      const customers = await getMockData("customers", []);
+      const customers = getMockData("customers", []);
       const index = customers.findIndex(c => c.email === email);
       if (index > -1) {
         const updatedUser = { ...customers[index], ...updatedFields };
         customers[index] = updatedUser;
-        await saveMockData("customers", customers);
+        saveMockData("customers", customers);
         if (typeof window !== "undefined") {
           localStorage.setItem("candy_world_logged_customer", JSON.stringify(updatedUser));
         }
@@ -1337,99 +1193,18 @@ export const getDBService = () => {
       }
       throw new Error("User not found");
     },
-    resetCustomerPassword: async (email) => {
-      if (isRealFirebase) {
-        // Firebase has built-in sendPasswordResetEmail
-        const { sendPasswordResetEmail: fbSendReset } = await import("firebase/auth");
-        const firebaseAuth = getAuth();
-        await fbSendReset(firebaseAuth, email);
-        return { sent: true };
-      }
-      // Demo fallback: generate temp password and update in DB
-      const customers = await getMockData("customers", []);
-      const customer = customers.find(c => c.email === email);
-      if (!customer) throw new Error("No account found with this email address.");
-      const tempPassword = Math.random().toString(36).slice(-8).toUpperCase();
-      customer.password = tempPassword;
-      await saveMockData("customers", customers);
-      return { sent: true, customer, tempPassword };
-    },
-    // Export onAuthStateChanged for AuthContext to use
-    onAuthStateChanged: (callback) => {
-      if (isRealFirebase) {
-        const firebaseAuth = getAuth();
-        const firestore = getFirestore();
-        return onAuthStateChanged(firebaseAuth, async (fbUser) => {
-          if (fbUser) {
-            // Fetch Firestore profile
-            const snap = await getDoc(doc(firestore, "customers", fbUser.uid));
-            const profile = snap.exists()
-              ? { ...snap.data(), uid: fbUser.uid }
-              : { customerId: fbUser.uid, name: fbUser.displayName, email: fbUser.email, uid: fbUser.uid };
-            // Cache locally so getCurrentCustomer works synchronously
-            if (typeof window !== "undefined") {
-              localStorage.setItem("candy_world_fb_customer", JSON.stringify(profile));
-            }
-            callback(profile);
-          } else {
-            if (typeof window !== "undefined") {
-              localStorage.removeItem("candy_world_fb_customer");
-            }
-            callback(null);
-          }
-        });
-      }
-      // Demo fallback: no real-time subscription, but asynchronously check session from cookie via API
-      setTimeout(async () => {
-        try {
-          // Check localStorage first (fast path for same device)
-          if (typeof window !== "undefined") {
-            const sessionStr = localStorage.getItem("candy_world_logged_customer");
-            if (sessionStr) {
-              const sessionUser = JSON.parse(sessionStr);
-              const customers = await getMockData("customers", []);
-              const found = customers.find(c => c.email === sessionUser.email && c.password === sessionUser.password);
-              if (found) { callback(found); return; }
-              localStorage.removeItem("candy_world_logged_customer");
-            }
-          }
-          // Check session cookie via document.cookie (cross-device path)
-          if (typeof document !== "undefined") {
-            const cookieVal = document.cookie
-              .split('; ')
-              .find(row => row.startsWith('candy_world_session='));
-            if (cookieVal) {
-              try {
-                const sessionUser = JSON.parse(decodeURIComponent(cookieVal.split('=').slice(1).join('=')));
-                const customers = await getMockData("customers", []);
-                const found = customers.find(c => c.email === sessionUser.email && c.password === sessionUser.password);
-                if (found) {
-                  if (typeof window !== "undefined") {
-                    localStorage.setItem("candy_world_logged_customer", JSON.stringify(found));
-                  }
-                  callback(found);
-                  return;
-                }
-              } catch(e) { /* bad cookie */ }
-            }
-          }
-        } catch(e) { /* ignore */ }
-        callback(null);
-      }, 0);
-      return null;
-    },
 
     // --- Promotions ---
     getPromotions: async () => {
-      return await getMockData("promotions", DEFAULT_PROMOTIONS);
+      return getMockData("promotions", DEFAULT_PROMOTIONS);
     },
 
     // --- Messages / Enquiries ---
     getMessages: async () => {
-      return await getMockData("messages", []);
+      return getMockData("messages", []);
     },
     saveMessage: async (msg) => {
-      const messages = await getMockData("messages", []);
+      const messages = getMockData("messages", []);
       const index = messages.findIndex(m => m.id === msg.id);
       const newMsg = {
         id: msg.id || `msg-${Date.now()}`,
@@ -1446,33 +1221,33 @@ export const getDBService = () => {
       } else {
         messages.push(newMsg);
       }
-      await saveMockData("messages", messages);
+      saveMockData("messages", messages);
       return newMsg;
     },
     deleteMessage: async (id) => {
-      const messages = await getMockData("messages", []);
+      const messages = getMockData("messages", []);
       const updated = messages.filter(m => m.id !== id);
-      await saveMockData("messages", updated);
+      saveMockData("messages", updated);
       return true;
     },
 
     // --- System Settings ---
     getSettings: async () => {
-      return await getMockData("settings", DEFAULT_SETTINGS);
+      return getMockData("settings", DEFAULT_SETTINGS);
     },
     saveSettings: async (settings) => {
-      const current = await getMockData("settings", DEFAULT_SETTINGS);
+      const current = getMockData("settings", DEFAULT_SETTINGS);
       const updated = { ...current, ...settings };
-      await saveMockData("settings", updated);
+      saveMockData("settings", updated);
       return updated;
     },
 
     // --- Admin Users & Auth Simulation ---
     getAdminUsers: async () => {
-      return await getMockData("adminUsers", DEFAULT_ADMIN_USERS);
+      return getMockData("adminUsers", DEFAULT_ADMIN_USERS);
     },
     loginAdmin: async (email, password) => {
-      const admins = await getMockData("adminUsers", DEFAULT_ADMIN_USERS);
+      const admins = getMockData("adminUsers", DEFAULT_ADMIN_USERS);
       const user = admins.find(a => a.email === email);
       if (user && password === "admin123") { // default password for testing
         if (typeof window !== "undefined") {
@@ -1495,10 +1270,10 @@ export const getDBService = () => {
 
     // --- Site Settings ---
     getSettings: async () => {
-      return await getMockData("settings", DEFAULT_SETTINGS);
+      return getMockData("settings", DEFAULT_SETTINGS);
     },
     saveSettings: async (settings) => {
-      await saveMockData("settings", settings);
+      saveMockData("settings", settings);
       return true;
     },
   };

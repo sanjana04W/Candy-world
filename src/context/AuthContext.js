@@ -11,65 +11,42 @@ export const AuthProvider = ({ children }) => {
   const dbService = getDBService();
 
   useEffect(() => {
-    // Subscribe to Firebase Auth state changes (cross-device persistent sessions)
-    // When real Firebase is configured, this fires automatically on every device
-    // when the user is already signed in — no manual localStorage check needed.
-    const unsubscribe = dbService.onAuthStateChanged((currentUser) => {
-      setUser(currentUser || null);
-      setLoading(false);
-    });
-
-    // Fallback: onAuthStateChanged returns null in demo mode
-    // In demo mode the callback above fires asynchronously via setTimeout,
-    // so we do NOT need a second localStorage check here - it would cause a race condition.
-    // The async callback will call setLoading(false) on its own.
-
-    return () => {
-      if (typeof unsubscribe === "function") unsubscribe();
-    };
+    // On mount, check if a user session exists in local storage
+    const currentUser = dbService.getCurrentCustomer();
+    if (currentUser) {
+      setUser(currentUser);
+    }
+    setLoading(false);
   }, []);
 
   const login = async (email, password) => {
+    setLoading(true);
     try {
       const loggedUser = await dbService.loginCustomer(email, password);
       setUser(loggedUser);
       return { success: true };
     } catch (error) {
-      // Normalize Firebase Auth error messages for better UX
-      let msg = error.message || "Failed to log in.";
-      if (msg.includes("auth/user-not-found") || msg.includes("auth/wrong-password") || msg.includes("auth/invalid-credential")) {
-        msg = "Invalid email or password. Please check your credentials.";
-      } else if (msg.includes("auth/too-many-requests")) {
-        msg = "Too many failed attempts. Please try again later.";
-      } else if (msg.includes("auth/network-request-failed")) {
-        msg = "Network error. Please check your connection and try again.";
-      }
-      return { success: false, error: msg };
+      return { success: false, error: error.message };
+    } finally {
+      setLoading(false);
     }
   };
 
   const register = async (userData) => {
+    setLoading(true);
     try {
       const newUser = await dbService.registerCustomer(userData);
       setUser(newUser);
       return { success: true };
     } catch (error) {
-      let msg = error.message || "Failed to register.";
-      if (msg.includes("auth/email-already-in-use") || msg.includes("Email already registered")) {
-        msg = "This email is already registered. Please log in instead.";
-      } else if (msg.includes("auth/weak-password")) {
-        msg = "Password is too weak. Use at least 6 characters.";
-      } else if (msg.includes("auth/invalid-email")) {
-        msg = "Please enter a valid email address.";
-      } else if (msg.includes("auth/network-request-failed")) {
-        msg = "Network error. Please check your connection and try again.";
-      }
-      return { success: false, error: msg };
+      return { success: false, error: error.message };
+    } finally {
+      setLoading(false);
     }
   };
 
-  const logout = async () => {
-    await dbService.logoutCustomer();
+  const logout = () => {
+    dbService.logoutCustomer();
     setUser(null);
   };
 

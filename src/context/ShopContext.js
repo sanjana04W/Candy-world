@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { getDBService } from "@/lib/firebase";
-import CartToast from "@/components/CartToast";
 
 const ShopContext = createContext();
 
@@ -11,7 +10,6 @@ export const ShopProvider = ({ children }) => {
   const [categories, setCategories] = useState([]);
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [cartToast, setCartToast] = useState(null);
   const dbService = getDBService();
 
   // Load products & categories from DB service
@@ -119,18 +117,6 @@ export const ShopProvider = ({ children }) => {
       }
     });
 
-    // Show cart toast notification
-    setCartToast({
-      id: Date.now(),
-      name: product.name,
-      image: product.images?.[0] || "/images/placeholder.jpg",
-      price: product.salePrice || product.basePrice,
-      quantity,
-      variantName: variantId && product.variants
-        ? product.variants.find(v => v.variantId === variantId)?.name || ""
-        : "",
-    });
-
     // Fire AddToCart pixel trigger (Pixel tracking mock calls)
     if (typeof window !== "undefined" && window.fbq) {
       window.fbq("track", "AddToCart", {
@@ -204,8 +190,6 @@ export const ShopProvider = ({ children }) => {
       }}
     >
       {children}
-      {/* Global cart-add notification toast */}
-      <CartToast toast={cartToast} onDismiss={() => setCartToast(null)} />
     </ShopContext.Provider>
   );
 };
