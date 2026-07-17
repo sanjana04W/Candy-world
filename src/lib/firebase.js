@@ -1146,6 +1146,7 @@ export const getDBService = () => {
       const newCustomer = {
         ...customerData,
         email: normalizedEmail,
+        password: customerData.password.trim(),
         customerId: `cust-${Date.now()}`,
         addresses: [],
         totalOrdersCount: 0,
@@ -1165,8 +1166,9 @@ export const getDBService = () => {
     loginCustomer: async (email, password) => {
       const customers = getMockData("customers", []);
       const normalizedEmail = email.trim().toLowerCase();
+      const normalizedPassword = password.trim();
       
-      const user = customers.find(c => c.email.trim().toLowerCase() === normalizedEmail && c.password === password);
+      const user = customers.find(c => c.email.trim().toLowerCase() === normalizedEmail && c.password.trim() === normalizedPassword);
       if (user) {
         if (typeof window !== "undefined") {
           localStorage.setItem("candy_world_logged_customer", JSON.stringify(user));
