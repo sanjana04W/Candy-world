@@ -868,6 +868,19 @@ const DEFAULT_ADMIN_USERS = [
   { uid: "admin-staff", name: "Candy Staff", email: "staff@candyworld.lk", role: "Staff", isActive: true }
 ];
 
+const DEFAULT_CUSTOMERS = [
+  {
+    customerId: "cust-test",
+    name: "Test User",
+    email: "test@example.com",
+    password: "password123",
+    addresses: [],
+    totalOrdersCount: 0,
+    lifetimeValue: 0,
+    createdAt: new Date()
+  }
+];
+
 // Data version — increment this whenever DEFAULT_PRODUCTS changes to force cache refresh
 const DATA_VERSION = "v4.0-2026-07-07-images-fix";
 
@@ -1064,7 +1077,7 @@ export const getDBService = () => {
       saveMockData("orders", orders);
 
       // Save customer record or update count
-      const customers = getMockData("customers", []);
+      const customers = getMockData("customers", DEFAULT_CUSTOMERS);
       const custIndex = customers.findIndex(c => c.phone === orderData.customerInfo.phone);
       if (custIndex > -1) {
         customers[custIndex].totalOrdersCount += 1;
@@ -1132,10 +1145,10 @@ export const getDBService = () => {
 
     // --- Customers ---
     getCustomers: async () => {
-      return getMockData("customers", []);
+      return getMockData("customers", DEFAULT_CUSTOMERS);
     },
     registerCustomer: async (customerData) => {
-      const customers = getMockData("customers", []);
+      const customers = getMockData("customers", DEFAULT_CUSTOMERS);
       // Normalize email to prevent mobile autocorrect/trailing space issues
       const normalizedEmail = customerData.email.trim().toLowerCase();
 
@@ -1164,7 +1177,7 @@ export const getDBService = () => {
       return newCustomer;
     },
     loginCustomer: async (email, password) => {
-      const customers = getMockData("customers", []);
+      const customers = getMockData("customers", DEFAULT_CUSTOMERS);
       const normalizedEmail = email.trim().toLowerCase();
       const normalizedPassword = password.trim();
       
@@ -1178,7 +1191,7 @@ export const getDBService = () => {
       throw new Error("Invalid email or password");
     },
     resetCustomerPassword: async (email) => {
-      const customers = getMockData("customers", []);
+      const customers = getMockData("customers", DEFAULT_CUSTOMERS);
       const normalizedEmail = email.trim().toLowerCase();
       const user = customers.find(c => c.email.trim().toLowerCase() === normalizedEmail);
       if (!user) {
@@ -1198,7 +1211,7 @@ export const getDBService = () => {
       }
     },
     updateCustomer: async (email, updatedFields) => {
-      const customers = getMockData("customers", []);
+      const customers = getMockData("customers", DEFAULT_CUSTOMERS);
       const index = customers.findIndex(c => c.email === email);
       if (index > -1) {
         const updatedUser = { ...customers[index], ...updatedFields };
