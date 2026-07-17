@@ -1175,6 +1175,16 @@ export const getDBService = () => {
       }
       throw new Error("Invalid email or password");
     },
+    resetCustomerPassword: async (email) => {
+      const customers = getMockData("customers", []);
+      const normalizedEmail = email.trim().toLowerCase();
+      const user = customers.find(c => c.email.trim().toLowerCase() === normalizedEmail);
+      if (!user) {
+        throw new Error("No account found with this email address.");
+      }
+      // Mocking a successful password reset email being sent
+      return true;
+    },
     getCurrentCustomer: () => {
       if (typeof window === "undefined") return null;
       const user = localStorage.getItem("candy_world_logged_customer");
