@@ -54,16 +54,16 @@ function LoginForm() {
 
       {/* Error Notification */}
       {error && (
-        <div className="fixed top-10 left-1/2 -translate-x-1/2 z-50 bg-rose-50 text-rose-600 px-6 py-3 rounded-full shadow-lg border border-rose-100 flex items-center gap-3 animate-pulse shadow-rose-500/10">
-          <span className="text-xl">⚠️</span>
+        <div className="mb-6 bg-rose-50 text-rose-600 px-4 py-3 rounded-2xl border border-rose-100 flex items-center gap-3 animate-pulse shadow-sm shadow-rose-500/10">
+          <span className="text-xl flex-shrink-0">⚠️</span>
           <span className="font-extrabold text-sm">{error}</span>
         </div>
       )}
 
       {/* Success Notification */}
       {successMsg && (
-        <div className="fixed top-10 left-1/2 -translate-x-1/2 z-50 bg-emerald-50 text-emerald-600 px-6 py-3 rounded-full shadow-lg border border-emerald-100 flex items-center gap-3 animate-bounce shadow-emerald-500/10">
-          <Sparkles className="h-5 w-5" />
+        <div className="mb-6 bg-emerald-50 text-emerald-600 px-4 py-3 rounded-2xl border border-emerald-100 flex items-center gap-3 animate-bounce shadow-sm shadow-emerald-500/10">
+          <Sparkles className="h-5 w-5 flex-shrink-0" />
           <span className="font-extrabold text-sm">{successMsg}</span>
         </div>
       )}
@@ -93,6 +93,9 @@ function LoginForm() {
             <label className="text-[10px] font-black uppercase tracking-wider text-gray-400">
               Password
             </label>
+            <Link href="/forgot-password" className="text-[10px] font-bold text-candy-purple hover:text-candy-pink hover:underline transition-colors">
+              Forgot Password?
+            </Link>
           </div>
           <div className="relative">
             <input
