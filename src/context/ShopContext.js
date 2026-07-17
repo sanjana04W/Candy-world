@@ -207,7 +207,7 @@ export const ShopProvider = ({ children }) => {
 
       {/* Toast Notification */}
       {toast && (
-        <div className="fixed bottom-5 right-5 z-[9999] max-w-sm w-full bg-white/95 backdrop-blur-md border border-gray-100 rounded-3xl p-4 shadow-2xl flex items-center gap-3 animate-fade-out-up transition-all duration-300">
+        <div className="fixed bottom-5 right-5 z-[9999] max-w-sm w-full bg-white/95 backdrop-blur-md border border-gray-100 rounded-3xl p-4 shadow-2xl flex items-center gap-3 animate-fade-in-up transition-all duration-300">
           <div className="relative h-12 w-12 rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 flex-shrink-0">
             <img
               src={toast.image}

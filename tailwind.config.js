@@ -39,11 +39,16 @@ module.exports = {
       },
       animation: {
         'fade-out-up': 'fadeOutUp 1s ease-out forwards',
+        'fade-in-up': 'fadeInUp 0.3s ease-out forwards',
       },
       keyframes: {
         fadeOutUp: {
           '0%': { opacity: '1', transform: 'translate(-50%, -50%) scale(0.5)' },
           '100%': { opacity: '0', transform: 'translate(-50%, -200%) scale(1.2)' },
+        },
+        fadeInUp: {
+          '0%': { opacity: '0', transform: 'translateY(1rem)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
         },
       },
     },
