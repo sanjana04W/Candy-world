@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { getDBService } from "@/lib/firebase";
+import Link from "next/link";
 
 const ShopContext = createContext();
 
@@ -9,17 +10,16 @@ export const ShopProvider = ({ children }) => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [cart, setCart] = useState([]);
-  const [toasts, setToasts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [toast, setToast] = useState(null);
   const dbService = getDBService();
 
-  const triggerToast = (productName, quantity, image) => {
-    const id = Date.now();
-    setToasts((prev) => [...prev, { id, productName, quantity, image }]);
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 3500);
-  };
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
 
   // Load products & categories from DB service
   const refreshCatalog = async () => {
@@ -126,9 +126,6 @@ export const ShopProvider = ({ children }) => {
       }
     });
 
-    // Trigger success notification
-    triggerToast(product.name, quantity, product.images?.[0] || "/images/placeholder.jpg");
-
     // Fire AddToCart pixel trigger (Pixel tracking mock calls)
     if (typeof window !== "undefined" && window.fbq) {
       window.fbq("track", "AddToCart", {
@@ -145,6 +142,11 @@ export const ShopProvider = ({ children }) => {
         currency: "LKR",
       });
     }
+
+    setToast({
+      message: `${product.name} has been added to your cart.`,
+      image: product.images[0] || "/images/placeholder.jpg",
+    });
   };
 
   const removeFromCart = (productId, variantId = null) => {
@@ -203,36 +205,37 @@ export const ShopProvider = ({ children }) => {
     >
       {children}
 
-      {/* Global animated success notifications for Add to Cart */}
-      <div className="fixed bottom-6 right-6 z-[9999] flex flex-col gap-3.5 max-w-sm w-full pointer-events-none">
-        {toasts.map((t) => (
-          <div
-            key={t.id}
-            className="flex items-center gap-4 bg-white/95 backdrop-blur-md border border-gray-100 border-l-4 border-l-candy-pink rounded-2xl p-4 shadow-xl shadow-candy-pink/5 animate-slide-in pointer-events-auto transition-all duration-300"
-          >
-            {t.image && (
-              <img
-                src={t.image}
-                alt={t.productName}
-                className="w-11 h-11 rounded-xl object-cover border border-gray-100 flex-shrink-0"
-              />
-            )}
-            <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-black text-candy-pink uppercase tracking-widest flex items-center gap-1">
-                <span>🍬 Added to Cart!</span>
-              </p>
-              <h5 className="text-sm font-bold text-gray-900 truncate mt-0.5">{t.productName}</h5>
-              <p className="text-[10px] text-gray-400 mt-0.5">Quantity: {t.quantity}</p>
-            </div>
-            <button
-              onClick={() => setToasts((prev) => prev.filter((toast) => toast.id !== t.id))}
-              className="text-gray-400 hover:text-gray-600 transition-colors p-1"
-            >
-              ✕
-            </button>
+      {/* Toast Notification */}
+      {toast && (
+        <div className="fixed bottom-5 right-5 z-[9999] max-w-sm w-full bg-white/95 backdrop-blur-md border border-gray-100 rounded-3xl p-4 shadow-2xl flex items-center gap-3 animate-fade-out-up transition-all duration-300">
+          <div className="relative h-12 w-12 rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 flex-shrink-0">
+            <img
+              src={toast.image}
+              alt="product"
+              className="h-full w-full object-cover"
+              onError={(e) => {
+                e.target.src = "/images/placeholder.jpg";
+              }}
+            />
           </div>
-        ))}
-      </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-black text-gray-900 truncate">Added to Cart!</p>
+            <p className="text-[11px] text-gray-500 truncate mt-0.5">{toast.message}</p>
+            <Link
+              href="/cart"
+              className="text-[10px] font-black uppercase tracking-wider text-candy-purple hover:text-candy-pink transition-colors mt-1 block"
+            >
+              View Cart &amp; Checkout →
+            </Link>
+          </div>
+          <button
+            onClick={() => setToast(null)}
+            className="p-1 text-gray-400 hover:text-gray-600 transition-colors self-start text-xs"
+          >
+            ✕
+          </button>
+        </div>
+      )}
     </ShopContext.Provider>
   );
 };
