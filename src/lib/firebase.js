@@ -1031,13 +1031,24 @@ export const getDBService = () => {
       try {
         const res = await fetch("/api/orders");
         if (!res.ok) throw new Error("Failed to fetch orders from server");
-        return await res.json();
+        const serverOrders = await res.json();
+        
+        // Merge with local storage orders to prevent loss on serverless container recycles
+        const localOrders = getMockData("orders", []);
+        const merged = [...serverOrders];
+        localOrders.forEach(local => {
+          if (!merged.some(m => m.orderId === local.orderId)) {
+            merged.push(local);
+          }
+        });
+        return merged;
       } catch (e) {
         console.error("Error reading order history from API, falling back to local storage", e);
         return getMockData("orders", []);
       }
     },
     createOrder: async (orderData) => {
+      const tempId = `ord-${Date.now()}`;
       try {
         const res = await fetch("/api/orders", {
           method: "POST",
@@ -1045,7 +1056,14 @@ export const getDBService = () => {
           body: JSON.stringify(orderData),
         });
         if (!res.ok) throw new Error("Failed to create order on server");
-        return await res.json();
+        const createdOrder = await res.json();
+        
+        // Save to local storage as well for local persistence
+        const orders = getMockData("orders", []);
+        orders.push(createdOrder);
+        saveMockData("orders", orders);
+        
+        return createdOrder;
       } catch (e) {
         console.error("Error creating order via API, falling back to local storage", e);
         const orders = getMockData("orders", []);
@@ -1083,10 +1101,10 @@ export const getDBService = () => {
 
         const newOrder = {
           ...orderData,
-          orderId: `ord-${Date.now()}`,
+          orderId: tempId,
           orderNumber: `CW-${10000 + orders.length + 1}`,
-          createdAt: new Date(),
-          updatedAt: new Date()
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
         };
 
         orders.push(newOrder);
@@ -1098,7 +1116,7 @@ export const getDBService = () => {
         if (custIndex > -1) {
           customers[custIndex].totalOrdersCount += 1;
           customers[custIndex].lifetimeValue += orderData.totalAmount;
-          customers[custIndex].lastOrderDate = new Date();
+          customers[custIndex].lastOrderDate = new Date().toISOString();
         } else {
           customers.push({
             customerId: `cust-${Date.now()}`,
@@ -1109,7 +1127,7 @@ export const getDBService = () => {
             district: orderData.customerInfo.district,
             totalOrdersCount: 1,
             lifetimeValue: orderData.totalAmount,
-            lastOrderDate: new Date()
+            lastOrderDate: new Date().toISOString()
           });
         }
         saveMockData("customers", customers);
@@ -1118,6 +1136,46 @@ export const getDBService = () => {
       }
     },
     updateOrderStatus: async (orderId, status, internalNote = "", riderInfo = "") => {
+      // First update locally for instant device updates
+      const orders = getMockData("orders", []);
+      const index = orders.findIndex(o => o.orderId === orderId);
+      if (index > -1) {
+        const order = orders[index];
+        const oldStatus = order.orderStatus;
+        order.orderStatus = status;
+        order.updatedAt = new Date().toISOString();
+        if (internalNote) {
+          order.internalNotes = (order.internalNotes || "") + `\n[${new Date().toLocaleDateString()}] ${internalNote}`;
+        }
+        if (status === "Dispatched" && riderInfo) {
+          order.courierName = riderInfo;
+        }
+
+        // If cancelled, restore stock
+        if (status === "Cancelled" && oldStatus !== "Cancelled") {
+          const products = getMockData("products", DEFAULT_PRODUCTS);
+          order.items.forEach(item => {
+            const prodIndex = products.findIndex(p => p.productId === item.productId);
+            if (prodIndex > -1) {
+              const product = products[prodIndex];
+              if (item.variantId && product.variants) {
+                const varIndex = product.variants.findIndex(v => v.variantId === item.variantId);
+                if (varIndex > -1) {
+                  product.variants[varIndex].stockLevel += item.quantity;
+                }
+              } else {
+                product.stockLevel += item.quantity;
+              }
+              product.stockStatus = "instock";
+            }
+          });
+          saveMockData("products", products);
+        }
+
+        orders[index] = order;
+        saveMockData("orders", orders);
+      }
+
       try {
         const res = await fetch("/api/orders", {
           method: "PUT",
@@ -1129,46 +1187,7 @@ export const getDBService = () => {
         return data.success;
       } catch (e) {
         console.error("Error updating order status via API, falling back to local storage", e);
-        const orders = getMockData("orders", []);
-        const index = orders.findIndex(o => o.orderId === orderId);
-        if (index > -1) {
-          const order = orders[index];
-          const oldStatus = order.orderStatus;
-          order.orderStatus = status;
-          order.updatedAt = new Date();
-          if (internalNote) {
-            order.internalNotes = (order.internalNotes || "") + `\n[${new Date().toLocaleDateString()}] ${internalNote}`;
-          }
-          if (status === "Dispatched" && riderInfo) {
-            order.courierName = riderInfo;
-          }
-
-          // If cancelled, restore stock
-          if (status === "Cancelled" && oldStatus !== "Cancelled") {
-            const products = getMockData("products", DEFAULT_PRODUCTS);
-            order.items.forEach(item => {
-              const prodIndex = products.findIndex(p => p.productId === item.productId);
-              if (prodIndex > -1) {
-                const product = products[prodIndex];
-                if (item.variantId && product.variants) {
-                  const varIndex = product.variants.findIndex(v => v.variantId === item.variantId);
-                  if (varIndex > -1) {
-                    product.variants[varIndex].stockLevel += item.quantity;
-                  }
-                } else {
-                  product.stockLevel += item.quantity;
-                }
-                product.stockStatus = "instock"; // simple restore
-              }
-            });
-            saveMockData("products", products);
-          }
-
-          orders[index] = order;
-          saveMockData("orders", orders);
-          return true;
-        }
-        return false;
+        return true;
       }
     },
 
