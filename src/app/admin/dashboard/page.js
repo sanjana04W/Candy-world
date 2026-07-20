@@ -7,7 +7,7 @@ import {
   ClipboardList, PackagePlus, AlertTriangle, BarChart3, Tag,
   LogOut, UserCheck, Plus, Trash2, Edit3, MessageSquare, Users,
   ChevronDown, Lock, Shield, ShieldCheck, CheckCircle2, XCircle,
-  TrendingUp, Package, ShoppingBag, Eye, EyeOff, Minus,
+  TrendingUp, Package, ShoppingBag, Eye, EyeOff, Minus, FileText,
   LayoutDashboard, DollarSign, Clock, ArrowUpRight, ArrowDownRight, ArrowRight,
   Bell, X as XIcon, ShoppingCart, Inbox, Mail, Send, Settings, ImageIcon, ExternalLink, Menu
 } from "lucide-react";
@@ -658,6 +658,208 @@ export default function AdminDashboard() {
     setInternalNote("");
     setSelectedOrderIdForNotes(null);
     loadAll();
+  };
+
+  const handleDownloadInvoice = (order) => {
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      alert("Please allow popups to download/print the invoice.");
+      return;
+    }
+    
+    const invoiceHtml = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Invoice - ${order.orderNumber}</title>
+        <meta charset="utf-8">
+        <style>
+          body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            color: #1f2937;
+            margin: 0;
+            padding: 40px;
+            font-size: 14px;
+            line-height: 1.5;
+          }
+          .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid #f3f4f6;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+          }
+          .logo {
+            font-size: 24px;
+            font-weight: 900;
+            color: #8b5cf6;
+          }
+          .title {
+            font-size: 28px;
+            font-weight: 900;
+            text-align: right;
+            margin: 0;
+            color: #111827;
+          }
+          .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+          }
+          .section-title {
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #9ca3af;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #f3f4f6;
+            padding-bottom: 4px;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+          }
+          th {
+            background-color: #fafaf9;
+            font-weight: 700;
+            text-align: left;
+            padding: 12px;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #4b5563;
+            border-bottom: 2px solid #e5e7eb;
+          }
+          td {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+          }
+          .totals {
+            margin-left: auto;
+            width: 300px;
+            margin-bottom: 40px;
+          }
+          .totals-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 13px;
+          }
+          .totals-row.grand {
+            font-size: 16px;
+            font-weight: 900;
+            border-top: 2px solid #111827;
+            padding-top: 12px;
+            color: #111827;
+          }
+          .footer {
+            text-align: center;
+            font-size: 11px;
+            color: #9ca3af;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 20px;
+            margin-top: 60px;
+          }
+          @media print {
+            body { padding: 0; }
+            .no-print { display: none; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div>
+            <div class="logo">🍬 CANDY WORLD</div>
+            <div style="font-size: 12px; color: #6b7280; margin-top: 4px;">
+              Thalawathugoda & Colombo 03, Sri Lanka<br>
+              Phone: +94 77 123 4567 | candyworld.lk23@gmail.com
+            </div>
+          </div>
+          <div>
+            <h1 class="title">INVOICE</h1>
+            <div style="text-align: right; font-size: 12px; color: #4b5563; margin-top: 8px;">
+              <strong>Invoice #:</strong> ${order.orderNumber}<br>
+              <strong>Date:</strong> ${new Date(order.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" })}
+            </div>
+          </div>
+        </div>
+
+        <div class="details-grid">
+          <div>
+            <div class="section-title">Billing & Shipping To</div>
+            <strong>${order.customerInfo.name}</strong><br>
+            Phone: ${order.customerInfo.phone}<br>
+            Email: ${order.customerInfo.email}<br>
+            Address: ${order.customerInfo.address}, ${order.customerInfo.district}
+          </div>
+          <div>
+            <div class="section-title">Payment & Delivery Info</div>
+            <strong>Payment Method:</strong> ${order.paymentMethod || "COD"}<br>
+            <strong>Payment Status:</strong> ${order.paymentStatus || "Pending"}<br>
+            <strong>Status:</strong> ${order.orderStatus || "Pending"}<br>
+            ${order.requestedDeliveryDate ? `<strong>Delivery Date:</strong> ${new Date(order.requestedDeliveryDate).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}` : ""}
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Item Description</th>
+              <th style="text-align: center; width: 80px;">Qty</th>
+              <th style="text-align: right; width: 120px;">Unit Price</th>
+              <th style="text-align: right; width: 120px;">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${order.items.map(item => `
+              <tr>
+                <td>
+                  <strong>${item.name}</strong>
+                  ${item.variantName ? `<br><span style="font-size: 11px; color: #6b7280;">Variant: ${item.variantName}</span>` : ""}
+                </td>
+                <td style="text-align: center;">${item.quantity}</td>
+                <td style="text-align: right;">LKR ${item.price.toLocaleString()}</td>
+                <td style="text-align: right;">LKR ${(item.price * item.quantity).toLocaleString()}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+
+        <div class="totals">
+          <div class="totals-row">
+            <span>Subtotal</span>
+            <span>LKR ${(order.subtotal || (order.totalAmount - (order.deliveryFee || 0))).toLocaleString()}</span>
+          </div>
+          <div class="totals-row">
+            <span>Delivery Fee</span>
+            <span>LKR ${(order.deliveryFee || 0).toLocaleString()}</span>
+          </div>
+          <div class="totals-row grand">
+            <span>Total Amount</span>
+            <span>LKR ${order.totalAmount.toLocaleString()}</span>
+          </div>
+        </div>
+
+        <div class="footer">
+          Thank you for shopping at Candy World!<br>
+          For support or returns, please contact our support team.
+        </div>
+
+        <script>
+          window.onload = function() {
+            window.print();
+          };
+        </script>
+      </body>
+      </html>
+    `;
+
+    printWindow.document.open();
+    printWindow.document.write(invoiceHtml);
+    printWindow.document.close();
   };
 
   // -----------------------------------------------------------------
@@ -1370,6 +1572,11 @@ export default function AdminDashboard() {
 
                               {/* Right: Note + WhatsApp */}
                               <div className="flex gap-2">
+                                <button
+                                  onClick={() => handleDownloadInvoice(order)}
+                                  className="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-100 text-[10px] font-black uppercase px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors">
+                                  <FileText className="h-3 w-3" /> Invoice
+                                </button>
                                 <button
                                   onClick={() => setSelectedOrderIdForNotes(selectedOrderIdForNotes === order.orderId ? null : order.orderId)}
                                   className="bg-white border border-gray-200 text-[10px] font-black uppercase px-3 py-1.5 rounded-xl flex items-center gap-1.5 hover:bg-gray-50 text-gray-600 transition-colors">
