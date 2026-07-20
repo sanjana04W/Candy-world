@@ -55,7 +55,7 @@ export default function ProfilePage() {
         const userOrders = allOrders.filter(
           (o) => o.customerInfo?.email?.toLowerCase() === user.email?.toLowerCase()
         );
-        setOrders(userOrders.reverse()); // Newest orders first
+        setOrders([...userOrders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))); // Newest orders first
       } catch (e) {
         console.error("Error reading order history", e);
       }

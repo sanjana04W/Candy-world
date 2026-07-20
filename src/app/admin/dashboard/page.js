@@ -609,7 +609,7 @@ export default function AdminDashboard() {
         dbService.getMessages(),
         dbService.getSettings(),
       ]);
-      setOrders(ords.reverse());
+      setOrders([...ords].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
       setProducts(prods);
       setCategories(cats);
       setCustomers(custs);
@@ -1189,7 +1189,7 @@ export default function AdminDashboard() {
             const now = new Date();
             const totalRevenue = orders.filter(o => o.orderStatus !== "Cancelled").reduce((s,o) => s + o.totalAmount, 0);
             const pendingOrders = orders.filter(o => o.orderStatus === "Pending").length;
-            const recentOrders = orders.slice(0, 5);
+            const recentOrders = [...orders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
 
             // Top products by order frequency (mock scoring)
             const productFreq = {};

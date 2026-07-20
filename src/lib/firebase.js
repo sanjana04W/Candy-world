@@ -1032,19 +1032,26 @@ export const getDBService = () => {
         const res = await fetch("/api/orders");
         if (!res.ok) throw new Error("Failed to fetch orders from server");
         const serverOrders = await res.json();
-        
-        // Merge with local storage orders to prevent loss on serverless container recycles
+
+        // Merge local storage orders as fallback for serverless container recycles
         const localOrders = getMockData("orders", []);
         const merged = [...serverOrders];
         localOrders.forEach(local => {
-          if (!merged.some(m => m.orderId === local.orderId)) {
+          // Deduplicate by both orderId AND orderNumber to avoid duplicates
+          const isDuplicate = merged.some(
+            m => m.orderId === local.orderId || m.orderNumber === local.orderNumber
+          );
+          if (!isDuplicate) {
             merged.push(local);
           }
         });
-        return merged;
+
+        // Always return newest orders first
+        return merged.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       } catch (e) {
         console.error("Error reading order history from API, falling back to local storage", e);
-        return getMockData("orders", []);
+        const localOrders = getMockData("orders", []);
+        return [...localOrders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       }
     },
     createOrder: async (orderData) => {
