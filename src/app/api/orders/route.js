@@ -36,7 +36,14 @@ function writeDb(data) {
 export async function GET() {
   try {
     const db = readDb();
-    return NextResponse.json(db.orders || [], { status: 200 });
+    return NextResponse.json(db.orders || [], {
+      status: 200,
+      headers: {
+        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+        "Pragma": "no-cache",
+        "Expires": "0",
+      },
+    });
   } catch (err) {
     console.error("[API GET /api/orders]", err);
     return NextResponse.json({ error: "Failed to fetch orders." }, { status: 500 });
@@ -50,6 +57,15 @@ export async function POST(request) {
     if (!db.orders) db.orders = [];
     if (!db.products) db.products = [];
     if (!db.customers) db.customers = [];
+
+    if (orderData.customerInfo) {
+      if (orderData.customerInfo.email) {
+        orderData.customerInfo.email = orderData.customerInfo.email.trim().toLowerCase();
+      }
+      if (orderData.customerInfo.phone) {
+        orderData.customerInfo.phone = orderData.customerInfo.phone.trim();
+      }
+    }
 
     // Decrement stock for purchased items
     orderData.items.forEach(item => {

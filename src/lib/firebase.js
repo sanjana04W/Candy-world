@@ -1029,7 +1029,10 @@ export const getDBService = () => {
     // --- Orders ---
     getOrders: async () => {
       try {
-        const res = await fetch("/api/orders");
+        const res = await fetch(`/api/orders?t=${Date.now()}`, {
+          cache: "no-store",
+          headers: { "Cache-Control": "no-cache" }
+        });
         if (!res.ok) throw new Error("Failed to fetch orders from server");
         const serverOrders = await res.json();
 
@@ -1069,32 +1072,6 @@ export const getDBService = () => {
         const orders = getMockData("orders", []);
         orders.push(createdOrder);
         saveMockData("orders", orders);
-
-        if (typeof window !== "undefined") {
-          const emailsToSave = new Set([
-            createdOrder.customerInfo?.email?.trim().toLowerCase(),
-            createdOrder.userEmail?.trim().toLowerCase()
-          ].filter(Boolean));
-
-          emailsToSave.forEach(email => {
-            const userKey = `candy_world_myorders_${email}`;
-            try {
-              const userOrders = JSON.parse(localStorage.getItem(userKey) || "[]");
-              if (!userOrders.some(o => o.orderId === createdOrder.orderId || o.orderNumber === createdOrder.orderNumber)) {
-                userOrders.push(createdOrder);
-                localStorage.setItem(userKey, JSON.stringify(userOrders));
-              }
-            } catch (_) {}
-          });
-
-          try {
-            const recents = JSON.parse(localStorage.getItem("candy_world_recent_placed_orders") || "[]");
-            if (!recents.some(o => o.orderId === createdOrder.orderId || o.orderNumber === createdOrder.orderNumber)) {
-              recents.push(createdOrder);
-              localStorage.setItem("candy_world_recent_placed_orders", JSON.stringify(recents));
-            }
-          } catch (_) {}
-        }
         
         return createdOrder;
       } catch (e) {
