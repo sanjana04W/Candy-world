@@ -1070,13 +1070,28 @@ export const getDBService = () => {
         orders.push(createdOrder);
         saveMockData("orders", orders);
 
-        if (typeof window !== "undefined" && createdOrder.customerInfo?.email) {
-          const userKey = `candy_world_myorders_${createdOrder.customerInfo.email.trim().toLowerCase()}`;
+        if (typeof window !== "undefined") {
+          const emailsToSave = new Set([
+            createdOrder.customerInfo?.email?.trim().toLowerCase(),
+            createdOrder.userEmail?.trim().toLowerCase()
+          ].filter(Boolean));
+
+          emailsToSave.forEach(email => {
+            const userKey = `candy_world_myorders_${email}`;
+            try {
+              const userOrders = JSON.parse(localStorage.getItem(userKey) || "[]");
+              if (!userOrders.some(o => o.orderId === createdOrder.orderId || o.orderNumber === createdOrder.orderNumber)) {
+                userOrders.push(createdOrder);
+                localStorage.setItem(userKey, JSON.stringify(userOrders));
+              }
+            } catch (_) {}
+          });
+
           try {
-            const userOrders = JSON.parse(localStorage.getItem(userKey) || "[]");
-            if (!userOrders.some(o => o.orderId === createdOrder.orderId || o.orderNumber === createdOrder.orderNumber)) {
-              userOrders.push(createdOrder);
-              localStorage.setItem(userKey, JSON.stringify(userOrders));
+            const recents = JSON.parse(localStorage.getItem("candy_world_recent_placed_orders") || "[]");
+            if (!recents.some(o => o.orderId === createdOrder.orderId || o.orderNumber === createdOrder.orderNumber)) {
+              recents.push(createdOrder);
+              localStorage.setItem("candy_world_recent_placed_orders", JSON.stringify(recents));
             }
           } catch (_) {}
         }

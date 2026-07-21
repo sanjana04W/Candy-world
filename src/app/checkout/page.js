@@ -4,12 +4,14 @@ import React, { useState, useEffect } from "react";
 import emailjs from "@emailjs/browser";
 import { useRouter } from "next/navigation";
 import { useShop } from "@/context/ShopContext";
+import { useAuth } from "@/context/AuthContext";
 import { getDBService } from "@/lib/firebase";
 import { CreditCard, ShoppingBag, ShieldAlert, CheckSquare } from "lucide-react";
 import { triggerPixelEvent, sendOrderNotificationEmail, sendVerificationCodeEmail } from "@/lib/integrations";
 
 export default function CheckoutPage() {
   const { cart, getCartSubtotal, getCartTotalWeight, clearCart } = useShop();
+  const { user } = useAuth();
   const router = useRouter();
   const dbService = getDBService();
 
@@ -31,6 +33,18 @@ export default function CheckoutPage() {
     requestedDeliveryDate: "",
     orderNotes: ""
   });
+
+  // Prefill form with logged-in user details if available
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        name: prev.name || user.name || "",
+        email: prev.email || user.email || "",
+        phone: prev.phone || user.phone || ""
+      }));
+    }
+  }, [user]);
   
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -115,6 +129,8 @@ export default function CheckoutPage() {
 
     try {
       const orderPayload = {
+        userId: user?.uid || user?.customerId || null,
+        userEmail: user?.email ? user.email.trim().toLowerCase() : (formData.email ? formData.email.trim().toLowerCase() : null),
         customerInfo: {
           name: formData.name,
           phone: formData.phone,
@@ -155,18 +171,34 @@ export default function CheckoutPage() {
       });
 
       // ── Persist order locally (survives Vercel container recycles) ──
-      // Save to a per-user localStorage key so the profile Order History
+      // Save to per-user localStorage keys so the profile Order History
       // always shows this order even if the server /tmp DB is wiped.
-      if (typeof window !== "undefined" && formData.email) {
-        const userKey = `candy_world_myorders_${formData.email.trim().toLowerCase()}`;
+      if (typeof window !== "undefined") {
+        const emailsToSave = new Set([
+          formData.email?.trim().toLowerCase(),
+          user?.email?.trim().toLowerCase()
+        ].filter(Boolean));
+
+        emailsToSave.forEach(email => {
+          const userKey = `candy_world_myorders_${email}`;
+          try {
+            const existing = JSON.parse(localStorage.getItem(userKey) || "[]");
+            const alreadySaved = existing.some(
+              o => o.orderId === newOrder.orderId || o.orderNumber === newOrder.orderNumber
+            );
+            if (!alreadySaved) {
+              existing.push(newOrder);
+              localStorage.setItem(userKey, JSON.stringify(existing));
+            }
+          } catch (_) {}
+        });
+
+        // Also save to recent placed orders for current session
         try {
-          const existing = JSON.parse(localStorage.getItem(userKey) || "[]");
-          const alreadySaved = existing.some(
-            o => o.orderId === newOrder.orderId || o.orderNumber === newOrder.orderNumber
-          );
-          if (!alreadySaved) {
-            existing.push(newOrder);
-            localStorage.setItem(userKey, JSON.stringify(existing));
+          const recents = JSON.parse(localStorage.getItem("candy_world_recent_placed_orders") || "[]");
+          if (!recents.some(o => o.orderId === newOrder.orderId || o.orderNumber === newOrder.orderNumber)) {
+            recents.push(newOrder);
+            localStorage.setItem("candy_world_recent_placed_orders", JSON.stringify(recents));
           }
         } catch (_) {}
       }

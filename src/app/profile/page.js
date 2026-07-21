@@ -47,45 +47,61 @@ export default function ProfilePage() {
     }
   }, [user, loading, router]);
 
-  // Load user order history from central DB and filter by user email
+  // Load user order history from central DB and local storage
   const fetchOrders = async () => {
     if (user && typeof window !== "undefined") {
       try {
         const userEmail = user.email?.trim().toLowerCase();
+        const userPhone = user.phone?.trim();
+        const userId = user.uid || user.customerId;
+        const userName = user.name?.trim().toLowerCase();
 
-        // Source 1: Server API orders (filtered by email)
+        const isUserOrder = (o) => {
+          if (!o) return false;
+          const orderEmail = (o.customerInfo?.email || o.userEmail || "").trim().toLowerCase();
+          if (userEmail && orderEmail && orderEmail === userEmail) return true;
+          if (userId && (o.userId === userId || o.customerId === userId)) return true;
+          if (userPhone && o.customerInfo?.phone && o.customerInfo.phone.trim() === userPhone) return true;
+          if (userName && o.customerInfo?.name && o.customerInfo.name.trim().toLowerCase() === userName) return true;
+          return false;
+        };
+
+        // Source 1: Server API orders
         let serverOrders = [];
         try {
           const allServerOrders = await dbService.getOrders();
-          serverOrders = allServerOrders.filter(
-            (o) => o.customerInfo?.email?.toLowerCase() === userEmail
-          );
+          serverOrders = allServerOrders.filter(isUserOrder);
         } catch (_) {}
 
-        // Source 2: Per-user localStorage key (most reliable — saved at checkout)
-        const userKey = `candy_world_myorders_${userEmail}`;
+        // Source 2: Per-user localStorage keys
         let myLocalOrders = [];
+        if (userEmail) {
+          try {
+            const userKey = `candy_world_myorders_${userEmail}`;
+            myLocalOrders = JSON.parse(localStorage.getItem(userKey) || "[]");
+          } catch (_) {}
+        }
+
+        // Source 3: Recent placed orders in current browser session
+        let recentOrders = [];
         try {
-          myLocalOrders = JSON.parse(localStorage.getItem(userKey) || "[]");
+          recentOrders = JSON.parse(localStorage.getItem("candy_world_recent_placed_orders") || "[]").filter(isUserOrder);
         } catch (_) {}
 
-        // Source 3: General orders localStorage (legacy fallback)
+        // Source 4: General orders localStorage
         let generalLocalOrders = [];
         try {
           const all = JSON.parse(localStorage.getItem("candy_world_orders") || "[]");
-          generalLocalOrders = all.filter(
-            (o) => o.customerInfo?.email?.toLowerCase() === userEmail
-          );
+          generalLocalOrders = all.filter(isUserOrder);
         } catch (_) {}
 
-        // Merge all three sources, deduplicate by orderId + orderNumber
+        // Merge all four sources, deduplicate by orderId + orderNumber
         const seen = new Set();
         const merged = [];
-        for (const order of [...serverOrders, ...myLocalOrders, ...generalLocalOrders]) {
+        for (const order of [...serverOrders, ...myLocalOrders, ...recentOrders, ...generalLocalOrders]) {
           const key = order.orderId || order.orderNumber;
           if (!seen.has(key)) {
             seen.add(key);
-            // Also block by orderNumber to prevent legacy duplicates
             if (order.orderNumber && seen.has(`num_${order.orderNumber}`)) continue;
             if (order.orderNumber) seen.add(`num_${order.orderNumber}`);
             merged.push(order);
