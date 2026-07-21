@@ -1069,6 +1069,17 @@ export const getDBService = () => {
         const orders = getMockData("orders", []);
         orders.push(createdOrder);
         saveMockData("orders", orders);
+
+        if (typeof window !== "undefined" && createdOrder.customerInfo?.email) {
+          const userKey = `candy_world_myorders_${createdOrder.customerInfo.email.trim().toLowerCase()}`;
+          try {
+            const userOrders = JSON.parse(localStorage.getItem(userKey) || "[]");
+            if (!userOrders.some(o => o.orderId === createdOrder.orderId || o.orderNumber === createdOrder.orderNumber)) {
+              userOrders.push(createdOrder);
+              localStorage.setItem(userKey, JSON.stringify(userOrders));
+            }
+          } catch (_) {}
+        }
         
         return createdOrder;
       } catch (e) {
