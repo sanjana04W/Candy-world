@@ -51,11 +51,49 @@ export default function ProfilePage() {
   const fetchOrders = async () => {
     if (user && typeof window !== "undefined") {
       try {
-        const allOrders = await dbService.getOrders();
-        const userOrders = allOrders.filter(
-          (o) => o.customerInfo?.email?.toLowerCase() === user.email?.toLowerCase()
-        );
-        setOrders([...userOrders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))); // Newest orders first
+        const userEmail = user.email?.trim().toLowerCase();
+
+        // Source 1: Server API orders (filtered by email)
+        let serverOrders = [];
+        try {
+          const allServerOrders = await dbService.getOrders();
+          serverOrders = allServerOrders.filter(
+            (o) => o.customerInfo?.email?.toLowerCase() === userEmail
+          );
+        } catch (_) {}
+
+        // Source 2: Per-user localStorage key (most reliable — saved at checkout)
+        const userKey = `candy_world_myorders_${userEmail}`;
+        let myLocalOrders = [];
+        try {
+          myLocalOrders = JSON.parse(localStorage.getItem(userKey) || "[]");
+        } catch (_) {}
+
+        // Source 3: General orders localStorage (legacy fallback)
+        let generalLocalOrders = [];
+        try {
+          const all = JSON.parse(localStorage.getItem("candy_world_orders") || "[]");
+          generalLocalOrders = all.filter(
+            (o) => o.customerInfo?.email?.toLowerCase() === userEmail
+          );
+        } catch (_) {}
+
+        // Merge all three sources, deduplicate by orderId + orderNumber
+        const seen = new Set();
+        const merged = [];
+        for (const order of [...serverOrders, ...myLocalOrders, ...generalLocalOrders]) {
+          const key = order.orderId || order.orderNumber;
+          if (!seen.has(key)) {
+            seen.add(key);
+            // Also block by orderNumber to prevent legacy duplicates
+            if (order.orderNumber && seen.has(`num_${order.orderNumber}`)) continue;
+            if (order.orderNumber) seen.add(`num_${order.orderNumber}`);
+            merged.push(order);
+          }
+        }
+
+        // Sort newest first
+        setOrders(merged.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
       } catch (e) {
         console.error("Error reading order history", e);
       }

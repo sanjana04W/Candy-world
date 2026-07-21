@@ -154,6 +154,23 @@ export default function CheckoutPage() {
         content_type: "product"
       });
 
+      // ── Persist order locally (survives Vercel container recycles) ──
+      // Save to a per-user localStorage key so the profile Order History
+      // always shows this order even if the server /tmp DB is wiped.
+      if (typeof window !== "undefined" && formData.email) {
+        const userKey = `candy_world_myorders_${formData.email.trim().toLowerCase()}`;
+        try {
+          const existing = JSON.parse(localStorage.getItem(userKey) || "[]");
+          const alreadySaved = existing.some(
+            o => o.orderId === newOrder.orderId || o.orderNumber === newOrder.orderNumber
+          );
+          if (!alreadySaved) {
+            existing.push(newOrder);
+            localStorage.setItem(userKey, JSON.stringify(existing));
+          }
+        } catch (_) {}
+      }
+
       // Clear cart and navigate immediately
       clearCart();
       router.push(`/checkout/confirmation?orderId=${newOrder.orderId}`);
