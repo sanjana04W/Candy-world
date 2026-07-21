@@ -222,3 +222,32 @@ export async function PUT(request) {
     return NextResponse.json({ error: "Failed to update order status." }, { status: 500 });
   }
 }
+
+export async function DELETE(request) {
+  try {
+    const { orderId, clearAll } = await request.json();
+    let cloudOrders = await readCloudOrders();
+    const db = readDb();
+
+    if (clearAll) {
+      db.orders = [];
+      await writeCloudOrders([]);
+      writeDb(db);
+      return NextResponse.json({ success: true, message: "All orders removed." }, { status: 200 });
+    }
+
+    if (orderId) {
+      let ordersList = cloudOrders || db.orders || [];
+      ordersList = ordersList.filter(o => o.orderId !== orderId);
+      db.orders = (db.orders || []).filter(o => o.orderId !== orderId);
+      await writeCloudOrders(ordersList);
+      writeDb(db);
+      return NextResponse.json({ success: true, message: "Order deleted." }, { status: 200 });
+    }
+
+    return NextResponse.json({ error: "orderId or clearAll parameter required." }, { status: 400 });
+  } catch (err) {
+    console.error("[API DELETE /api/orders]", err);
+    return NextResponse.json({ error: "Failed to delete order." }, { status: 500 });
+  }
+}

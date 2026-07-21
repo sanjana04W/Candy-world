@@ -1200,6 +1200,36 @@ export const getDBService = () => {
         return true;
       }
     },
+    deleteOrder: async (orderId) => {
+      const orders = getMockData("orders", []);
+      const filtered = orders.filter(o => o.orderId !== orderId);
+      saveMockData("orders", filtered);
+      try {
+        await fetch("/api/orders", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ orderId }),
+        });
+        return true;
+      } catch (e) {
+        console.error("Error deleting order via API", e);
+        return true;
+      }
+    },
+    clearAllOrders: async () => {
+      saveMockData("orders", []);
+      try {
+        await fetch("/api/orders", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ clearAll: true }),
+        });
+        return true;
+      } catch (e) {
+        console.error("Error clearing orders via API", e);
+        return true;
+      }
+    },
 
     // --- Customers ---
     getCustomers: async () => {

@@ -660,6 +660,20 @@ export default function AdminDashboard() {
     loadAll();
   };
 
+  const handleDeleteOrder = async (orderId) => {
+    if (confirm("Are you sure you want to delete this order permanently?")) {
+      await dbService.deleteOrder(orderId);
+      loadAll();
+    }
+  };
+
+  const handleClearAllOrders = async () => {
+    if (confirm("⚠️ Are you sure you want to delete ALL order histories permanently? This action cannot be undone.")) {
+      await dbService.clearAllOrders();
+      loadAll();
+    }
+  };
+
   const handleDownloadInvoice = (order) => {
     const printWindow = window.open("", "_blank");
     if (!printWindow) {
@@ -1425,9 +1439,19 @@ export default function AdminDashboard() {
 
             <div className="space-y-5">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                <div>
-                  <h2 className="text-lg font-black text-gray-900">Order Management</h2>
-                  <p className="text-xs text-gray-400">Real-time order tracking & workflow</p>
+                <div className="flex items-center gap-2">
+                  <div>
+                    <h2 className="text-lg font-black text-gray-900">Order Management</h2>
+                    <p className="text-xs text-gray-400">Real-time order tracking & workflow</p>
+                  </div>
+                  {isOwner && orders.length > 0 && (
+                    <button
+                      onClick={handleClearAllOrders}
+                      className="bg-rose-100 hover:bg-rose-200 text-rose-700 text-[10px] font-black uppercase px-3 py-1.5 rounded-xl transition-colors flex items-center gap-1 ml-4"
+                    >
+                      <Trash2 className="h-3 w-3" /> Clear All Orders
+                    </button>
+                  )}
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                   {["all","Pending","Confirmed","Processing","Dispatched","Completed","Cancelled"].map(st => (
@@ -1588,6 +1612,13 @@ export default function AdminDashboard() {
                                   className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-100 text-[10px] font-black uppercase px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors">
                                   💬 WhatsApp
                                 </a>
+                                <button
+                                  onClick={() => handleDeleteOrder(order.orderId)}
+                                  className="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-100 text-[10px] font-black uppercase px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors"
+                                  title="Delete Order"
+                                >
+                                  <Trash2 className="h-3 w-3" /> Delete
+                                </button>
                               </div>
                             </div>
 
