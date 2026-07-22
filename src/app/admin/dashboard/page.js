@@ -9,7 +9,8 @@ import {
   ChevronDown, Lock, Shield, ShieldCheck, CheckCircle2, XCircle,
   TrendingUp, Package, ShoppingBag, Eye, EyeOff, Minus, FileText,
   LayoutDashboard, DollarSign, Clock, ArrowUpRight, ArrowDownRight, ArrowRight,
-  Bell, X as XIcon, ShoppingCart, Inbox, Mail, Send, Settings, ImageIcon, ExternalLink, Menu
+  Bell, X as XIcon, X, ShoppingCart, Inbox, Mail, Send, Settings, ImageIcon, ExternalLink, Menu,
+  Power, Pencil, Check
 } from "lucide-react";
 
 // -----------------------------------------------------------------
@@ -573,6 +574,63 @@ export default function AdminDashboard() {
   const [showUserForm, setShowUserForm] = useState(false);
   const [userForm, setUserForm] = useState({ name: "", email: "", role: "Staff", isActive: true });
 
+  // RBAC — edit staff modal
+  const [editingUser, setEditingUser] = useState(null); // user object being edited
+  const [editUserForm, setEditUserForm] = useState({ name: "", email: "", role: "", isActive: true, permissions: [] });
+
+  // RBAC — role management
+  const [showCreateRole, setShowCreateRole] = useState(false);
+  const [newRole, setNewRole] = useState({ name: "", description: "", permissions: [] });
+  const [customRoles, setCustomRoles] = useState(() => {
+    if (typeof window !== "undefined") {
+      try { return JSON.parse(localStorage.getItem("candy_world_customRoles") || "[]"); } catch { return []; }
+    }
+    return [];
+  });
+
+  // Permission definitions grouped by category
+  const PERMISSION_GROUPS = [
+    {
+      key: "orders", label: "ORDERS", color: "text-blue-700", bg: "bg-blue-50", icon: "🛒",
+      perms: ["View Orders", "Update Order Status", "Contact Customers via WhatsApp"]
+    },
+    {
+      key: "products", label: "PRODUCTS & INVENTORY", color: "text-green-700", bg: "bg-green-50", icon: "📦",
+      perms: ["View Products", "Add New Products", "Edit Existing Products", "Delete Products", "Manage Stock & Inventory"]
+    },
+    {
+      key: "customers", label: "CUSTOMERS", color: "text-orange-700", bg: "bg-orange-50", icon: "👤",
+      perms: ["View Customer Profiles"]
+    },
+    {
+      key: "analytics", label: "ANALYTICS", color: "text-purple-700", bg: "bg-purple-50", icon: "📊",
+      perms: ["View Analytics & Revenue", "View Sales Reports"]
+    },
+    {
+      key: "settings", label: "SETTINGS", color: "text-gray-700", bg: "bg-gray-50", icon: "⚙️",
+      perms: ["System Settings", "Promotions & Discounts", "Pixel & Integrations"]
+    },
+  ];
+
+  // Built-in roles with predefined permissions
+  const BUILT_IN_ROLES = [
+    {
+      name: "Order Handler",
+      description: "Manages orders and customer communication.",
+      permissions: ["View Orders", "Update Order Status", "Contact Customers via WhatsApp", "View Customer Profiles"],
+    },
+    {
+      name: "Inventory Manager",
+      description: "Controls products and stock levels.",
+      permissions: ["View Products", "Add New Products", "Edit Existing Products", "Delete Products", "Manage Stock & Inventory"],
+    },
+    {
+      name: "Content Manager",
+      description: "Edits website content and policies.",
+      permissions: ["View Products", "Edit Existing Products", "Promotions & Discounts"],
+    },
+  ];
+
   // Messages state
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [messageReply, setMessageReply] = useState("");
@@ -983,6 +1041,79 @@ export default function AdminDashboard() {
     }
     setAdminUsers(updated);
   };
+
+  // Open edit staff modal
+  const handleOpenEditUser = (u) => {
+    setEditingUser(u);
+    setEditUserForm({
+      name: u.name || "",
+      email: u.email || "",
+      role: u.role || "Staff",
+      isActive: u.isActive !== false,
+      permissions: u.permissions || [],
+    });
+  };
+
+  // Toggle individual permission in edit form
+  const handleTogglePermission = (perm, form, setForm) => {
+    const perms = form.permissions || [];
+    setForm(f => ({
+      ...f,
+      permissions: perms.includes(perm) ? perms.filter(p => p !== perm) : [...perms, perm]
+    }));
+  };
+
+  // Select/clear all perms in a group
+  const handleGroupToggle = (groupPerms, form, setForm) => {
+    const all = groupPerms.every(p => (form.permissions || []).includes(p));
+    setForm(f => ({
+      ...f,
+      permissions: all
+        ? (f.permissions || []).filter(p => !groupPerms.includes(p))
+        : [...new Set([...(f.permissions || []), ...groupPerms])]
+    }));
+  };
+
+  // Save edited staff member
+  const handleSaveEditUser = () => {
+    const updated = adminUsers.map(u =>
+      u.uid === editingUser.uid ? { ...u, ...editUserForm } : u
+    );
+    localStorage.setItem("candy_world_adminUsers", JSON.stringify(updated));
+    setAdminUsers(updated);
+    setEditingUser(null);
+  };
+
+  // Apply role preset to edit form
+  const handleApplyRole = (roleName, form, setForm) => {
+    const allRoles = [...BUILT_IN_ROLES, ...customRoles];
+    const roleObj = allRoles.find(r => r.name === roleName);
+    setForm(f => ({
+      ...f,
+      role: roleName,
+      permissions: roleObj ? roleObj.permissions : f.permissions,
+    }));
+  };
+
+  // Create new custom role
+  const handleCreateRole = () => {
+    if (!newRole.name.trim()) return;
+    const role = { ...newRole, type: "custom", id: `role-${Date.now()}` };
+    const updated = [...customRoles, role];
+    localStorage.setItem("candy_world_customRoles", JSON.stringify(updated));
+    setCustomRoles(updated);
+    setShowCreateRole(false);
+    setNewRole({ name: "", description: "", permissions: [] });
+  };
+
+  const handleDeleteRole = (id) => {
+    if (!confirm("Delete this custom role?")) return;
+    const updated = customRoles.filter(r => r.id !== id);
+    localStorage.setItem("candy_world_customRoles", JSON.stringify(updated));
+    setCustomRoles(updated);
+  };
+
+  const getAllPermissionsCount = () => PERMISSION_GROUPS.reduce((acc, g) => acc + g.perms.length, 0);
 
   // Track header height so the mobile backdrop starts below it
   const headerRef = React.useRef(null);
@@ -2062,139 +2193,526 @@ export default function AdminDashboard() {
               TAB 6 — USER MANAGEMENT (Owner only)
           ═══════════════════════════════ */}
           {activeTab === "users" && isOwner && (
-            <div className="space-y-5">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h2 className="text-lg font-black text-gray-900">User Management</h2>
-                  <p className="text-xs text-gray-400">Add, remove & configure staff access roles</p>
-                </div>
-                {!showUserForm && (
-                  <button onClick={() => setShowUserForm(true)}
+            <div className="space-y-6">
+
+              {/* ── Backend Staff Profiles ── */}
+              <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
+                <div className="flex justify-between items-center px-6 pt-5 pb-3">
+                  <div>
+                    <h2 className="text-base font-black text-gray-900">Backend Staff Profiles</h2>
+                    <p className="text-xs text-gray-400">Manage Role-Based Access Control (RBAC) permissions.</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setShowUserForm(true);
+                      setEditingUser(null);
+                      setEditUserForm({ name: "", email: "", role: "Order Handler", isActive: true, permissions: [] });
+                    }}
                     className="bg-gradient-to-r from-rose-500 to-purple-600 text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-md">
                     <Plus className="h-4 w-4" /> Add Staff
                   </button>
-                )}
-              </div>
-
-              {/* Role Reference */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-100 rounded-2xl p-5 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <ShieldCheck className="h-5 w-5 text-purple-600" />
-                    <h4 className="font-black text-purple-800 text-sm">Owner / Super Admin</h4>
-                  </div>
-                  <ul className="text-xs text-purple-700 space-y-1 pl-1">
-                    {["All 5 admin modules","Product pricing & catalog","Promotions & discount rules","Analytics & revenue data","Pixel & system settings","User management & role assignment"].map(p => (
-                      <li key={p} className="flex items-center gap-1.5"><CheckCircle2 className="h-3 w-3 text-purple-400 flex-shrink-0" />{p}</li>
-                    ))}
-                  </ul>
                 </div>
-                <div className="bg-gray-50 border border-gray-100 rounded-2xl p-5 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <UserCheck className="h-5 w-5 text-gray-500" />
-                    <h4 className="font-black text-gray-700 text-sm">Staff / Operator</h4>
-                  </div>
-                  <ul className="text-xs text-gray-500 space-y-1 pl-1">
-                    {["Order management & status updates","Internal notes per order","Inventory view & stock adjustment"].map(p => (
-                      <li key={p} className="flex items-center gap-1.5"><CheckCircle2 className="h-3 w-3 text-emerald-400 flex-shrink-0" />{p}</li>
-                    ))}
-                    {["Product pricing","Promotions / discounts","Analytics & revenue","User management"].map(p => (
-                      <li key={p} className="flex items-center gap-1.5"><XCircle className="h-3 w-3 text-rose-300 flex-shrink-0" />{p}</li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-
-              {showUserForm && (
-                <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm space-y-4">
-                  <h4 className="font-black text-gray-800">Add / Update Staff Account</h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-gray-400 uppercase">Full Name</label>
-                      <input type="text" value={userForm.name}
-                        onChange={e => setUserForm(u => ({ ...u, name: e.target.value }))}
-                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs" />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-gray-400 uppercase">Email</label>
-                      <input type="email" value={userForm.email}
-                        onChange={e => setUserForm(u => ({ ...u, email: e.target.value }))}
-                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs" />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-gray-400 uppercase">Role</label>
-                      <select value={userForm.role}
-                        onChange={e => setUserForm(u => ({ ...u, role: e.target.value }))}
-                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs font-bold">
-                        <option value="Owner">Owner</option>
-                        <option value="Staff">Staff</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div className="flex gap-3">
-                    <button onClick={handleSaveUser}
-                      className="bg-gradient-to-r from-rose-500 to-purple-600 text-white font-black text-xs px-6 py-2 rounded-xl shadow-md">
-                      Save User
-                    </button>
-                    <button onClick={() => setShowUserForm(false)}
-                      className="bg-white border border-gray-200 text-gray-600 text-xs font-bold px-6 py-2 rounded-xl">
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm">
                 <table className="w-full text-left">
                   <thead>
-                    <tr className="bg-gray-50 text-[10px] font-black uppercase tracking-wider text-gray-400">
-                      <th className="px-5 py-3">Name</th>
-                      <th className="px-5 py-3">Email</th>
-                      <th className="px-5 py-3">Role</th>
-                      <th className="px-5 py-3">Status</th>
-                      <th className="px-5 py-3 text-right">Actions</th>
+                    <tr className="bg-gray-50 text-[10px] font-black uppercase tracking-wider text-gray-400 border-t border-gray-100">
+                      <th className="px-6 py-3">Member</th>
+                      <th className="px-4 py-3">Role</th>
+                      <th className="px-4 py-3">Permissions</th>
+                      <th className="px-4 py-3">Status</th>
+                      <th className="px-4 py-3 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50 text-xs text-gray-700">
-                    {adminUsers.map(u => (
-                      <tr key={u.uid} className="hover:bg-gray-50/50 transition-colors">
-                        <td className="px-5 py-3.5 font-bold text-gray-900 flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-rose-400 to-purple-600 text-white flex items-center justify-center font-black text-xs">
-                            {u.name?.charAt(0) || "?"}
-                          </div>
-                          {u.name}
-                        </td>
-                        <td className="px-5 py-3.5 font-mono">{u.email}</td>
-                        <td className="px-5 py-3.5">
-                          <span className={`px-2.5 py-0.5 rounded-full font-black text-[9px] uppercase border ${
-                            u.role === "Owner"
-                              ? "bg-purple-50 border-purple-200 text-purple-700"
+                    {adminUsers.map(u => {
+                      const isOwnerRow = u.role === "Owner";
+                      const permCount = isOwnerRow ? "All permissions" : `${(u.permissions || []).length} permissions`;
+                      return (
+                        <tr key={u.uid} className="hover:bg-gray-50/50 transition-colors">
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-sm text-white ${
+                                isOwnerRow ? "bg-gradient-to-br from-rose-500 to-purple-600" : "bg-gradient-to-br from-gray-400 to-gray-600"
+                              }`}>{u.name?.charAt(0) || "?"}</div>
+                              <div>
+                                <div className="font-bold text-gray-900 text-xs">{u.name}</div>
+                                <div className="text-[10px] text-gray-400 font-mono">{u.email}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-4">
+                            <span className={`px-2.5 py-1 rounded-full font-black text-[10px] uppercase border ${
+                              isOwnerRow ? "bg-rose-50 border-rose-200 text-rose-700"
+                              : u.role === "Order Handler" ? "bg-blue-50 border-blue-200 text-blue-700"
+                              : u.role === "Inventory Manager" ? "bg-green-50 border-green-200 text-green-700"
+                              : u.role === "Content Manager" ? "bg-purple-50 border-purple-200 text-purple-700"
                               : "bg-gray-50 border-gray-200 text-gray-600"
-                          }`}>{u.role}</span>
+                            }`}>{isOwnerRow ? "SUPER ADMIN" : (u.role || "Staff").toUpperCase()}</span>
+                          </td>
+                          <td className="px-4 py-4">
+                            <span className={isOwnerRow ? "text-rose-500 font-bold text-xs" : "text-gray-500 text-xs"}>{permCount}</span>
+                          </td>
+                          <td className="px-4 py-4">
+                            <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold ${
+                              u.isActive !== false ? "bg-emerald-50 text-emerald-600" : "bg-gray-100 text-gray-400"
+                            }`}>
+                              <span className={`w-1.5 h-1.5 rounded-full ${u.isActive !== false ? "bg-emerald-500" : "bg-gray-400"}`}></span>
+                              {u.isActive !== false ? "Active" : "Inactive"}
+                            </span>
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="flex items-center justify-end gap-1.5">
+                              {/* View */}
+                              <button
+                                onClick={() => handleOpenEditUser(u)}
+                                className="p-1.5 border border-gray-200 rounded-lg hover:border-gray-400 hover:text-gray-600 transition-colors text-gray-400"
+                                title="View/Edit">
+                                <Eye className="h-3.5 w-3.5" />
+                              </button>
+                              {/* Toggle active (non-owner only) */}
+                              {!isOwnerRow && (
+                                <button
+                                  onClick={() => handleToggleUserActive(u.uid)}
+                                  className={`p-1.5 border rounded-lg transition-colors ${
+                                    u.isActive !== false
+                                      ? "border-amber-200 text-amber-500 hover:bg-amber-50"
+                                      : "border-emerald-200 text-emerald-500 hover:bg-emerald-50"
+                                  }`}
+                                  title={u.isActive !== false ? "Deactivate" : "Activate"}>
+                                  <Power className="h-3.5 w-3.5" />
+                                </button>
+                              )}
+                              {/* Edit (non-owner only) */}
+                              {!isOwnerRow && (
+                                <button
+                                  onClick={() => handleOpenEditUser(u)}
+                                  className="p-1.5 border border-gray-200 rounded-lg hover:border-blue-400 hover:text-blue-500 transition-colors text-gray-400"
+                                  title="Edit">
+                                  <Pencil className="h-3.5 w-3.5" />
+                                </button>
+                              )}
+                              {/* Delete (non-owner only) */}
+                              {!isOwnerRow && (
+                                <button
+                                  onClick={() => handleDeleteUser(u.uid)}
+                                  className="p-1.5 border border-gray-200 rounded-lg hover:border-rose-400 hover:text-rose-500 transition-colors text-gray-400"
+                                  title="Delete">
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* ── Role Management ── */}
+              <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
+                <div className="flex justify-between items-center px-6 pt-5 pb-3">
+                  <div>
+                    <h2 className="text-base font-black text-gray-900">Role Management</h2>
+                    <p className="text-xs text-gray-400">Create and manage custom roles with specific permission sets.</p>
+                  </div>
+                  <button
+                    onClick={() => setShowCreateRole(true)}
+                    className="flex items-center gap-1.5 border border-rose-300 text-rose-600 bg-rose-50 hover:bg-rose-100 text-xs font-bold px-4 py-2 rounded-xl transition-colors">
+                    <Plus className="h-3.5 w-3.5" /> Create Role
+                  </button>
+                </div>
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="bg-gray-50 text-[10px] font-black uppercase tracking-wider text-gray-400 border-t border-gray-100">
+                      <th className="px-6 py-3">Role</th>
+                      <th className="px-4 py-3">Description</th>
+                      <th className="px-4 py-3">Permissions</th>
+                      <th className="px-4 py-3">Type</th>
+                      <th className="px-4 py-3 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50 text-xs text-gray-700">
+                    {/* Super Admin built-in */}
+                    <tr className="hover:bg-gray-50/50">
+                      <td className="px-6 py-4"><span className="px-2.5 py-1 rounded-full font-black text-[10px] uppercase bg-rose-50 border border-rose-200 text-rose-600">Super Admin</span></td>
+                      <td className="px-4 py-4 text-rose-500">Full unrestricted access to all features.</td>
+                      <td className="px-4 py-4 text-rose-500 font-semibold">All permissions</td>
+                      <td className="px-4 py-4"><span className="text-gray-500">🔒 Built-in</span></td>
+                      <td className="px-4 py-4 text-right text-gray-300">—</td>
+                    </tr>
+                    {/* Built-in roles */}
+                    {BUILT_IN_ROLES.map(role => (
+                      <tr key={role.name} className="hover:bg-gray-50/50">
+                        <td className="px-6 py-4">
+                          <span className={`px-2.5 py-1 rounded-full font-black text-[10px] uppercase border ${
+                            role.name === "Order Handler" ? "bg-blue-50 border-blue-200 text-blue-700"
+                            : role.name === "Inventory Manager" ? "bg-green-50 border-green-200 text-green-700"
+                            : "bg-purple-50 border-purple-200 text-purple-700"
+                          }`}>{role.name.toUpperCase()}</span>
                         </td>
-                        <td className="px-5 py-3.5">
-                          <span className={`px-2.5 py-0.5 rounded-full font-black text-[9px] uppercase ${u.isActive ? "bg-emerald-50 text-emerald-600" : "bg-gray-100 text-gray-400"}`}>
-                            {u.isActive ? "Active" : "Inactive"}
-                          </span>
+                        <td className="px-4 py-4 text-gray-500">{role.description}</td>
+                        <td className="px-4 py-4 text-gray-600">{role.permissions.length} permissions</td>
+                        <td className="px-4 py-4"><span className="text-gray-500">🔒 Built-in</span></td>
+                        <td className="px-4 py-4 text-right text-gray-300">—</td>
+                      </tr>
+                    ))}
+                    {/* Custom roles */}
+                    {customRoles.map(role => (
+                      <tr key={role.id} className="hover:bg-gray-50/50">
+                        <td className="px-6 py-4">
+                          <span className="px-2.5 py-1 rounded-full font-black text-[10px] uppercase bg-amber-50 border border-amber-200 text-amber-700">{role.name.toUpperCase()}</span>
                         </td>
-                        <td className="px-5 py-3.5 text-right space-x-2">
-                          <button onClick={() => handleToggleUserActive(u.uid)}
-                            className="inline-flex p-1.5 border border-gray-200 rounded-lg hover:border-purple-400 hover:text-purple-500 transition-colors"
-                            title={u.isActive ? "Deactivate" : "Activate"}>
-                            {u.isActive ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                          </button>
-                          <button onClick={() => handleDeleteUser(u.uid)}
-                            disabled={u.email === adminUser.email}
-                            className="inline-flex p-1.5 border border-gray-200 rounded-lg hover:border-rose-400 hover:text-rose-500 transition-colors disabled:opacity-30"
-                            title="Delete">
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
+                        <td className="px-4 py-4 text-gray-500">{role.description}</td>
+                        <td className="px-4 py-4 text-gray-600">{(role.permissions || []).length} permissions</td>
+                        <td className="px-4 py-4"><span className="text-amber-600">✏️ Custom</span></td>
+                        <td className="px-4 py-4 text-right">
+                          <button onClick={() => handleDeleteRole(role.id)} className="p-1.5 border border-gray-200 rounded-lg hover:border-rose-400 hover:text-rose-500 transition-colors text-gray-400" title="Delete"><Trash2 className="h-3.5 w-3.5" /></button>
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
+
+              {/* ── Edit Staff Modal ── */}
+              {editingUser && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+                  <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+                    <div className="flex justify-between items-start p-6 pb-4 border-b border-gray-100">
+                      <div>
+                        <h3 className="font-black text-gray-900">Edit Staff Member</h3>
+                        <p className="text-xs text-gray-400 mt-0.5">Assign a role and choose individual permissions.</p>
+                      </div>
+                      <button onClick={() => setEditingUser(null)} className="text-gray-400 hover:text-gray-600 transition-colors"><X className="h-5 w-5" /></button>
+                    </div>
+                    <div className="p-6 space-y-5">
+                      {/* Name + Email */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <label className="text-xs font-bold text-gray-700">Full Name <span className="text-rose-500">*</span></label>
+                          <input type="text" value={editUserForm.name}
+                            onChange={e => setEditUserForm(f => ({ ...f, name: e.target.value }))}
+                            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300" />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-xs font-bold text-gray-700">Email Address <span className="text-rose-500">*</span></label>
+                          <input type="email" value={editUserForm.email}
+                            onChange={e => setEditUserForm(f => ({ ...f, email: e.target.value }))}
+                            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300" />
+                        </div>
+                      </div>
+                      {/* Account Status toggle */}
+                      <div className="flex justify-between items-center border border-gray-100 rounded-xl px-4 py-3 bg-gray-50">
+                        <div>
+                          <div className="text-sm font-bold text-gray-800">Account Status</div>
+                          <div className="text-xs text-gray-400">Inactive accounts cannot access the admin panel.</div>
+                        </div>
+                        <button
+                          onClick={() => setEditUserForm(f => ({ ...f, isActive: !f.isActive }))}
+                          className={`relative w-11 h-6 rounded-full transition-colors ${
+                            editUserForm.isActive ? "bg-emerald-500" : "bg-gray-300"
+                          }`}>
+                          <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                            editUserForm.isActive ? "translate-x-5" : "translate-x-0"
+                          }`}></span>
+                        </button>
+                      </div>
+                      {/* Role selector cards */}
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold text-gray-700">Role <span className="text-rose-500">*</span> <span className="text-gray-400 font-normal">— Selecting a role pre-fills recommended permissions</span></label>
+                        <div className="grid grid-cols-3 gap-2">
+                          {BUILT_IN_ROLES.map(role => (
+                            <button
+                              key={role.name}
+                              onClick={() => handleApplyRole(role.name, editUserForm, setEditUserForm)}
+                              className={`text-left border rounded-xl p-3 transition-all ${
+                                editUserForm.role === role.name
+                                  ? "border-rose-400 bg-rose-50 ring-1 ring-rose-300"
+                                  : "border-gray-200 hover:border-gray-300"
+                              }`}>
+                              <div className="flex items-center gap-1 mb-1">
+                                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                                  editUserForm.role === role.name ? "border-rose-500" : "border-gray-300"
+                                }`}>
+                                  {editUserForm.role === role.name && <div className="w-2 h-2 rounded-full bg-rose-500" />}
+                                </div>
+                                <span className="text-[11px] font-black text-gray-900 leading-tight">{role.name}</span>
+                                <Lock className="h-3 w-3 text-gray-300 ml-auto flex-shrink-0" />
+                              </div>
+                              <p className="text-[10px] text-gray-400 leading-snug">{role.description}</p>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      {/* Permission checkboxes */}
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-black text-gray-900">Access Permissions</span>
+                          <div className="flex gap-3">
+                            <button onClick={() => setEditUserForm(f => ({ ...f, permissions: PERMISSION_GROUPS.flatMap(g => g.perms) }))} className="text-xs text-rose-500 font-bold">Select All</button>
+                            <span className="text-gray-300">|</span>
+                            <button onClick={() => setEditUserForm(f => ({ ...f, permissions: [] }))} className="text-xs text-gray-500 font-bold">Clear All</button>
+                          </div>
+                        </div>
+                        {PERMISSION_GROUPS.map(group => {
+                          const selected = group.perms.filter(p => (editUserForm.permissions || []).includes(p));
+                          const allSelected = selected.length === group.perms.length;
+                          return (
+                            <div key={group.key} className={`rounded-xl border ${allSelected ? "border-blue-100" : "border-gray-100"} overflow-hidden`}>
+                              <div
+                                onClick={() => handleGroupToggle(group.perms, editUserForm, setEditUserForm)}
+                                className={`flex justify-between items-center px-4 py-2.5 cursor-pointer ${allSelected ? "bg-blue-50" : "bg-gray-50"}`}>
+                                <span className={`text-[11px] font-black uppercase ${group.color} flex items-center gap-2`}>
+                                  <span>{group.icon}</span>{group.label}
+                                </span>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-[10px] text-gray-500">{selected.length}/{group.perms.length} selected</span>
+                                  <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
+                                    allSelected ? "bg-blue-500 border-blue-500" : "border-gray-300"
+                                  }`}>
+                                    {allSelected && <Check className="h-2.5 w-2.5 text-white" />}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="px-4 py-2 space-y-2 bg-white">
+                                {group.perms.map(perm => (
+                                  <label key={perm} className="flex items-center gap-3 cursor-pointer py-0.5">
+                                    <div
+                                      onClick={() => handleTogglePermission(perm, editUserForm, setEditUserForm)}
+                                      className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 cursor-pointer ${
+                                        (editUserForm.permissions || []).includes(perm)
+                                          ? "bg-rose-500 border-rose-500"
+                                          : "border-gray-300"
+                                      }`}>
+                                      {(editUserForm.permissions || []).includes(perm) && <Check className="h-2.5 w-2.5 text-white" />}
+                                    </div>
+                                    <span className="text-xs text-gray-700">{perm}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-100">
+                      <button onClick={() => setEditingUser(null)} className="px-5 py-2 text-sm text-gray-600 hover:text-gray-900 font-semibold">Cancel</button>
+                      <button onClick={handleSaveEditUser} className="bg-gradient-to-r from-rose-500 to-purple-600 text-white font-bold text-sm px-6 py-2 rounded-xl shadow-md">Save Changes</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ── Add Staff Modal ── */}
+              {showUserForm && !editingUser && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+                  <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+                    <div className="flex justify-between items-start p-6 pb-4 border-b border-gray-100">
+                      <div>
+                        <h3 className="font-black text-gray-900">Add Staff Member</h3>
+                        <p className="text-xs text-gray-400 mt-0.5">Assign a role and choose individual permissions.</p>
+                      </div>
+                      <button onClick={() => setShowUserForm(false)} className="text-gray-400 hover:text-gray-600"><X className="h-5 w-5" /></button>
+                    </div>
+                    <div className="p-6 space-y-5">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <label className="text-xs font-bold text-gray-700">Full Name <span className="text-rose-500">*</span></label>
+                          <input type="text" value={editUserForm.name}
+                            onChange={e => setEditUserForm(f => ({ ...f, name: e.target.value }))}
+                            placeholder="E.g. Kasun Perera"
+                            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300" />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-xs font-bold text-gray-700">Email Address <span className="text-rose-500">*</span></label>
+                          <input type="email" value={editUserForm.email}
+                            onChange={e => setEditUserForm(f => ({ ...f, email: e.target.value }))}
+                            placeholder="staff@candyworld.lk"
+                            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300" />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold text-gray-700">Role <span className="text-rose-500">*</span> <span className="text-gray-400 font-normal">— Selecting a role pre-fills recommended permissions</span></label>
+                        <div className="grid grid-cols-3 gap-2">
+                          {BUILT_IN_ROLES.map(role => (
+                            <button
+                              key={role.name}
+                              onClick={() => handleApplyRole(role.name, editUserForm, setEditUserForm)}
+                              className={`text-left border rounded-xl p-3 transition-all ${
+                                editUserForm.role === role.name
+                                  ? "border-rose-400 bg-rose-50 ring-1 ring-rose-300"
+                                  : "border-gray-200 hover:border-gray-300"
+                              }`}>
+                              <div className="flex items-center gap-1 mb-1">
+                                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                                  editUserForm.role === role.name ? "border-rose-500" : "border-gray-300"
+                                }`}>
+                                  {editUserForm.role === role.name && <div className="w-2 h-2 rounded-full bg-rose-500" />}
+                                </div>
+                                <span className="text-[11px] font-black text-gray-900 leading-tight">{role.name}</span>
+                                <Lock className="h-3 w-3 text-gray-300 ml-auto flex-shrink-0" />
+                              </div>
+                              <p className="text-[10px] text-gray-400 leading-snug">{role.description}</p>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-black text-gray-900">Access Permissions</span>
+                          <div className="flex gap-3">
+                            <button onClick={() => setEditUserForm(f => ({ ...f, permissions: PERMISSION_GROUPS.flatMap(g => g.perms) }))} className="text-xs text-rose-500 font-bold">Select All</button>
+                            <span className="text-gray-300">|</span>
+                            <button onClick={() => setEditUserForm(f => ({ ...f, permissions: [] }))} className="text-xs text-gray-500 font-bold">Clear All</button>
+                          </div>
+                        </div>
+                        {PERMISSION_GROUPS.map(group => {
+                          const selected = group.perms.filter(p => (editUserForm.permissions || []).includes(p));
+                          const allSelected = selected.length === group.perms.length;
+                          return (
+                            <div key={group.key} className={`rounded-xl border ${allSelected ? "border-blue-100" : "border-gray-100"} overflow-hidden`}>
+                              <div
+                                onClick={() => handleGroupToggle(group.perms, editUserForm, setEditUserForm)}
+                                className={`flex justify-between items-center px-4 py-2.5 cursor-pointer ${allSelected ? "bg-blue-50" : "bg-gray-50"}`}>
+                                <span className={`text-[11px] font-black uppercase ${group.color} flex items-center gap-2`}>
+                                  <span>{group.icon}</span>{group.label}
+                                </span>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-[10px] text-gray-500">{selected.length}/{group.perms.length} selected</span>
+                                  <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
+                                    allSelected ? "bg-blue-500 border-blue-500" : "border-gray-300"
+                                  }`}>
+                                    {allSelected && <Check className="h-2.5 w-2.5 text-white" />}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="px-4 py-2 space-y-2 bg-white">
+                                {group.perms.map(perm => (
+                                  <label key={perm} className="flex items-center gap-3 cursor-pointer py-0.5">
+                                    <div
+                                      onClick={() => handleTogglePermission(perm, editUserForm, setEditUserForm)}
+                                      className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 cursor-pointer ${
+                                        (editUserForm.permissions || []).includes(perm)
+                                          ? "bg-rose-500 border-rose-500"
+                                          : "border-gray-300"
+                                      }`}>
+                                      {(editUserForm.permissions || []).includes(perm) && <Check className="h-2.5 w-2.5 text-white" />}
+                                    </div>
+                                    <span className="text-xs text-gray-700">{perm}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-100">
+                      <button onClick={() => setShowUserForm(false)} className="px-5 py-2 text-sm text-gray-600 hover:text-gray-900 font-semibold">Cancel</button>
+                      <button
+                        onClick={() => {
+                          if (!editUserForm.name || !editUserForm.email) return;
+                          const updated = [...adminUsers, { uid: `admin-${Date.now()}`, ...editUserForm }];
+                          localStorage.setItem("candy_world_adminUsers", JSON.stringify(updated));
+                          setAdminUsers(updated);
+                          setShowUserForm(false);
+                          setEditUserForm({ name: "", email: "", role: "Order Handler", isActive: true, permissions: [] });
+                        }}
+                        className="bg-gradient-to-r from-rose-500 to-purple-600 text-white font-bold text-sm px-6 py-2 rounded-xl shadow-md">Save Changes</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ── Create Role Modal ── */}
+              {showCreateRole && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+                  <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+                    <div className="flex justify-between items-start p-6 pb-4 border-b border-gray-100">
+                      <div>
+                        <h3 className="font-black text-gray-900">Create New Role</h3>
+                        <p className="text-xs text-gray-400 mt-0.5">Define the role and assign its permissions.</p>
+                      </div>
+                      <button onClick={() => setShowCreateRole(false)} className="text-gray-400 hover:text-gray-600"><X className="h-5 w-5" /></button>
+                    </div>
+                    <div className="p-6 space-y-5">
+                      <div className="space-y-1">
+                        <label className="text-xs font-bold text-gray-700">Role Name <span className="text-rose-500">*</span></label>
+                        <input type="text" value={newRole.name}
+                          onChange={e => setNewRole(r => ({ ...r, name: e.target.value }))}
+                          placeholder="E.g. Kitchen Supervisor"
+                          className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300" />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-xs font-bold text-gray-700">Description</label>
+                        <input type="text" value={newRole.description}
+                          onChange={e => setNewRole(r => ({ ...r, description: e.target.value }))}
+                          placeholder="Brief description of this role's responsibilities"
+                          className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300" />
+                      </div>
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-black text-gray-900">Access Permissions</span>
+                          <div className="flex gap-3">
+                            <button onClick={() => setNewRole(r => ({ ...r, permissions: PERMISSION_GROUPS.flatMap(g => g.perms) }))} className="text-xs text-rose-500 font-bold">Select All</button>
+                            <span className="text-gray-300">|</span>
+                            <button onClick={() => setNewRole(r => ({ ...r, permissions: [] }))} className="text-xs text-gray-500 font-bold">Clear All</button>
+                          </div>
+                        </div>
+                        {PERMISSION_GROUPS.map(group => {
+                          const selected = group.perms.filter(p => (newRole.permissions || []).includes(p));
+                          const allSelected = selected.length === group.perms.length;
+                          return (
+                            <div key={group.key} className={`rounded-xl border ${allSelected ? "border-blue-100" : "border-gray-100"} overflow-hidden`}>
+                              <div
+                                onClick={() => handleGroupToggle(group.perms, newRole, setNewRole)}
+                                className={`flex justify-between items-center px-4 py-2.5 cursor-pointer ${allSelected ? "bg-blue-50" : "bg-gray-50"}`}>
+                                <span className={`text-[11px] font-black uppercase ${group.color} flex items-center gap-2`}>
+                                  <span>{group.icon}</span>{group.label}
+                                </span>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-[10px] text-gray-500">{selected.length}/{group.perms.length} selected</span>
+                                  <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
+                                    allSelected ? "bg-blue-500 border-blue-500" : "border-gray-300"
+                                  }`}>
+                                    {allSelected && <Check className="h-2.5 w-2.5 text-white" />}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="px-4 py-2 space-y-2 bg-white">
+                                {group.perms.map(perm => (
+                                  <label key={perm} className="flex items-center gap-3 cursor-pointer py-0.5">
+                                    <div
+                                      onClick={() => handleTogglePermission(perm, newRole, setNewRole)}
+                                      className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 cursor-pointer ${
+                                        (newRole.permissions || []).includes(perm)
+                                          ? "bg-rose-500 border-rose-500"
+                                          : "border-gray-300"
+                                      }`}>
+                                      {(newRole.permissions || []).includes(perm) && <Check className="h-2.5 w-2.5 text-white" />}
+                                    </div>
+                                    <span className="text-xs text-gray-700">{perm}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-100">
+                      <button onClick={() => setShowCreateRole(false)} className="px-5 py-2 text-sm text-gray-600 hover:text-gray-900 font-semibold">Cancel</button>
+                      <button
+                        onClick={handleCreateRole}
+                        disabled={!newRole.name.trim()}
+                        className="bg-gradient-to-r from-rose-500 to-purple-600 text-white font-bold text-sm px-6 py-2 rounded-xl shadow-md disabled:opacity-50">
+                        Create Role
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
             </div>
           )}
 
