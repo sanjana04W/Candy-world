@@ -615,19 +615,9 @@ export default function AdminDashboard() {
   // Built-in roles with predefined permissions
   const BUILT_IN_ROLES = [
     {
-      name: "Order Handler",
-      description: "Manages orders and customer communication.",
-      permissions: ["View Orders", "Update Order Status", "Contact Customers via WhatsApp", "View Customer Profiles"],
-    },
-    {
-      name: "Inventory Manager",
-      description: "Controls products and stock levels.",
-      permissions: ["View Products", "Add New Products", "Edit Existing Products", "Delete Products", "Manage Stock & Inventory"],
-    },
-    {
-      name: "Content Manager",
-      description: "Edits website content and policies.",
-      permissions: ["View Products", "Edit Existing Products", "Promotions & Discounts"],
+      name: "Staff",
+      description: "Standard staff access for everyday operations.",
+      permissions: ["View Orders", "Update Order Status", "Contact Customers via WhatsApp", "View Products", "Manage Stock & Inventory", "View Customer Profiles", "View Analytics & Revenue", "View Sales Reports"],
     },
   ];
 
@@ -2206,7 +2196,7 @@ export default function AdminDashboard() {
                     onClick={() => {
                       setShowUserForm(true);
                       setEditingUser(null);
-                      setEditUserForm({ name: "", email: "", role: "Order Handler", isActive: true, permissions: [] });
+                      setEditUserForm({ name: "", email: "", role: "Staff", isActive: true, permissions: [] });
                     }}
                     className="bg-gradient-to-r from-rose-500 to-purple-600 text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-md">
                     <Plus className="h-4 w-4" /> Add Staff
@@ -2242,9 +2232,7 @@ export default function AdminDashboard() {
                           <td className="px-4 py-4">
                             <span className={`px-2.5 py-1 rounded-full font-black text-[10px] uppercase border ${
                               isOwnerRow ? "bg-rose-50 border-rose-200 text-rose-700"
-                              : u.role === "Order Handler" ? "bg-blue-50 border-blue-200 text-blue-700"
-                              : u.role === "Inventory Manager" ? "bg-green-50 border-green-200 text-green-700"
-                              : u.role === "Content Manager" ? "bg-purple-50 border-purple-200 text-purple-700"
+                              : u.role === "Staff" ? "bg-blue-50 border-blue-200 text-blue-700"
                               : "bg-gray-50 border-gray-200 text-gray-600"
                             }`}>{isOwnerRow ? "SUPER ADMIN" : (u.role || "Staff").toUpperCase()}</span>
                           </td>
@@ -2345,8 +2333,7 @@ export default function AdminDashboard() {
                       <tr key={role.name} className="hover:bg-gray-50/50">
                         <td className="px-6 py-4">
                           <span className={`px-2.5 py-1 rounded-full font-black text-[10px] uppercase border ${
-                            role.name === "Order Handler" ? "bg-blue-50 border-blue-200 text-blue-700"
-                            : role.name === "Inventory Manager" ? "bg-green-50 border-green-200 text-green-700"
+                            role.name === "Staff" ? "bg-blue-50 border-blue-200 text-blue-700"
                             : "bg-purple-50 border-purple-200 text-purple-700"
                           }`}>{role.name.toUpperCase()}</span>
                         </td>
@@ -2420,7 +2407,7 @@ export default function AdminDashboard() {
                       {/* Role selector cards */}
                       <div className="space-y-2">
                         <label className="text-xs font-bold text-gray-700">Role <span className="text-rose-500">*</span> <span className="text-gray-400 font-normal">— Selecting a role pre-fills recommended permissions</span></label>
-                        <div className="grid grid-cols-3 gap-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                           {BUILT_IN_ROLES.map(role => (
                             <button
                               key={role.name}
@@ -2533,7 +2520,7 @@ export default function AdminDashboard() {
                       </div>
                       <div className="space-y-2">
                         <label className="text-xs font-bold text-gray-700">Role <span className="text-rose-500">*</span> <span className="text-gray-400 font-normal">— Selecting a role pre-fills recommended permissions</span></label>
-                        <div className="grid grid-cols-3 gap-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                           {BUILT_IN_ROLES.map(role => (
                             <button
                               key={role.name}
@@ -2616,7 +2603,7 @@ export default function AdminDashboard() {
                           localStorage.setItem("candy_world_adminUsers", JSON.stringify(updated));
                           setAdminUsers(updated);
                           setShowUserForm(false);
-                          setEditUserForm({ name: "", email: "", role: "Order Handler", isActive: true, permissions: [] });
+                          setEditUserForm({ name: "", email: "", role: "Staff", isActive: true, permissions: [] });
                         }}
                         className="bg-gradient-to-r from-rose-500 to-purple-600 text-white font-bold text-sm px-6 py-2 rounded-xl shadow-md">Save Changes</button>
                     </div>
