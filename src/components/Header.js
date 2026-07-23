@@ -139,7 +139,7 @@ export default function Header() {
                           {subCategoryMap[cat.categoryId]?.map((sub) => (
                             <Link
                               key={sub.categoryId}
-                              href={`/category/${cat.slug}`}
+                              href={`/category/${cat.slug}?sub=${sub.categoryId}`}
                               onClick={() => setShopDropdownOpen(false)}
                               className="block text-xs font-medium text-gray-500 hover:text-candy-pink py-0.5 pl-6 transition-colors"
                             >

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, Suspense } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useShop } from "@/context/ShopContext";
 import ProductCard from "@/components/ProductCard";
 import { ArrowLeft } from "lucide-react";
@@ -10,6 +10,7 @@ function CategoryContent() {
   const { slug } = useParams();
   const { products, categories, loading } = useShop();
   const router = useRouter();
+  const searchParams = useSearchParams();
   
   const [activeSubCat, setActiveSubCat] = useState("all");
 
@@ -23,10 +24,15 @@ function CategoryContent() {
     (c) => parentCategory && c.parentId === parentCategory.categoryId && c.status === "active"
   );
 
-  // Set default active tab
+  // Set default active tab or use sub param from URL
   useEffect(() => {
-    setActiveSubCat("all");
-  }, [slug]);
+    const subParam = searchParams.get("sub");
+    if (subParam) {
+      setActiveSubCat(subParam);
+    } else {
+      setActiveSubCat("all");
+    }
+  }, [slug, searchParams]);
 
   if (loading) {
     return (
